@@ -1,110 +1,55 @@
-import { TickerData } from '@/lib/types';
-
-interface PriceCache {
-    openPrice: number;
-    timestamp: number;
-}
+import { chunk } from '@/lib/buffer'; // Eğer buffer.ts'de chunk yoksa aşağıya ekledim.
 
 export class TimeframeManager {
-    private cache: Map<string, PriceCache> = new Map();
-    private readonly CACHE_DURATION = 60 * 60 * 1000; // 1 Hour Cache
+    private baseUrl = 'https://api.binance.com/api/v3';
 
-    // Interval to Binance Kline Interval map
-    private readonly INTERVAL_MAP: Record<string, string> = {
-        '1m': '1m',
-        '15m': '15m',
-        '1h': '1h',
-        '4h': '4h',
-        '24h': '1d', // 1d open used for reference, though 24h stream uses rolling window
-        '7d': '1w'
-    };
-
-    /**
-     * Bulk fetch baseline prices for multiple symbols.
-     * Use sparingly to avoid rate limits.
-     */
+    // Verilen sembol listesi için "Open Price" verilerini çeker
     async fetchBaselines(symbols: string[], timeframe: string): Promise<Map<string, number>> {
-        const resultMap = new Map<string, number>();
-        const interval = this.INTERVAL_MAP[timeframe];
+        const baselineMap = new Map<string, number>();
 
-        if (!interval || timeframe === '24h') return resultMap;
-
-        // 1. Filter for USDT pairs only (Safety check)
+        // Sadece USDT paritelerini filtrele (Gürültüyü azalt)
         const targetSymbols = symbols.filter(s => s.endsWith('USDT'));
 
-        // 2. Chunking Configuration
-        const CHUNK_SIZE = 20;
-        const DELAY_MS = 50;
+        // 20'li paketlere böl (Batching)
+        const batches = this.chunkArray(targetSymbols, 20);
 
-        const chunks = [];
-        for (let i = 0; i < targetSymbols.length; i += CHUNK_SIZE) {
-            chunks.push(targetSymbols.slice(i, i + CHUNK_SIZE));
-        }
-
-        for (const chunk of chunks) {
-            await Promise.all(chunk.map(async (symbol) => {
+        // Her paketi işle
+        for (const batch of batches) {
+            await Promise.all(batch.map(async (symbol) => {
                 try {
-                    const price = await this.fetchBasePrice(symbol, timeframe);
-                    if (price !== null) {
-                        resultMap.set(symbol, price);
+                    // Limit=1 ve Interval=timeframe ile son mumu çek
+                    const res = await fetch(`${this.baseUrl}/klines?symbol=${symbol}&interval=${timeframe}&limit=1`);
+
+                    if (!res.ok) return; // Hata veren coini atla
+
+                    const data = await res.json();
+                    // Binance kline format: [OpenTime, Open, High, Low, Close, ...]
+                    // Index 1 = Open Price
+                    if (Array.isArray(data) && data.length > 0) {
+                        const openPrice = parseFloat(data[0][1]);
+                        if (!isNaN(openPrice)) {
+                            baselineMap.set(symbol, openPrice);
+                        }
                     }
                 } catch (e) {
-                    // Fail silent per symbol
+                    // Tekil hata tüm süreci durdurmasın (Fail-Safe)
+                    console.warn(`Failed to fetch baseline for ${symbol}`, e);
                 }
             }));
-            // Rate Limiting Delay
-            await new Promise(r => setTimeout(r, DELAY_MS));
+
+            // API'ye nefes aldır (50ms bekle)
+            await new Promise(r => setTimeout(r, 50));
         }
 
-        return resultMap;
+        return baselineMap;
     }
 
-    /**
-     * Get the Open Price for the start of the timeframe.
-     */
-    async fetchBasePrice(symbol: string, timeframe: string): Promise<number | null> {
-        // ... (rest of method same)
-        // For 24h, we can use the stream data directly, no need to fetch
-        if (timeframe === '24h') return null;
-
-        const cacheKey = `${symbol}-${timeframe}`;
-        const cached = this.cache.get(cacheKey);
-        const now = Date.now();
-
-        // Check Cache (Lazy simple cache, ideally aligned with candle close times)
-        // For now, simple TTL
-        if (cached && (now - cached.timestamp) < this.CACHE_DURATION) {
-            return cached.openPrice;
+    // Yardımcı fonksiyon: Diziyi parçalara böler
+    private chunkArray<T>(array: T[], size: number): T[][] {
+        const result: T[][] = [];
+        for (let i = 0; i < array.length; i += size) {
+            result.push(array.slice(i, i + size));
         }
-
-        const interval = this.INTERVAL_MAP[timeframe];
-        if (!interval) return null;
-
-        try {
-            // Fetch single latest completed candle or current candle
-            // limit=1 gives the latest candle (still forming usually)
-            const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=1`);
-            const data = await res.json();
-
-            if (data && data.length > 0) {
-                // kline: [time, open, high, low, close, ...]
-                const openPrice = parseFloat(data[0][1]);
-
-                this.cache.set(cacheKey, {
-                    openPrice,
-                    timestamp: now
-                });
-                return openPrice;
-            }
-        } catch (err) {
-            console.warn(`[TimeframeManager] Failed to fetch for ${symbol}`, err);
-        }
-
-        return null;
-    }
-
-    calculateDynamicChange(currentPrice: number, basePrice: number): number {
-        if (basePrice === 0) return 0;
-        return ((currentPrice - basePrice) / basePrice) * 100;
+        return result;
     }
 }
