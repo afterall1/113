@@ -130,6 +130,11 @@ export default function NebulaCanvas() {
                     orb.animate();
                 });
 
+                // Debug Logging (Throttled)
+                if (Date.now() % 2000 < 20) {
+                    console.log(`[Nebula Debug] Timeframe: ${activeTimeframe}, Baselines: ${baselines.size}, Query: ${query}`);
+                }
+
                 // Cleanup stale orbs? (Optional for now)
             });
         };
