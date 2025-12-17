@@ -40,6 +40,12 @@ export function useBinanceStream() {
     // Throttled UI Update Ref
     const lastUiUpdate = useRef(0);
 
+    // Use Ref to access latest timeframe inside callback without triggering effect re-run
+    const timeframeRef = useRef(timeframe);
+    useEffect(() => {
+        timeframeRef.current = timeframe;
+    }, [timeframe]);
+
     useEffect(() => {
         let reconnectTimeout: NodeJS.Timeout;
 
@@ -57,6 +63,9 @@ export function useBinanceStream() {
                     const shouldUpdateUI = now - lastUiUpdate.current > 1000; // 1s UI Throttle
                     const uiBatch: TickerData[] = [];
 
+                    // Access latest timeframe via Ref
+                    const currentTimeframe = timeframeRef.current;
+
                     for (const ticker of rawData) {
                         // Filter
                         if (!ticker.s.endsWith(TARGET_QUOTE_ASSET)) continue;
@@ -68,51 +77,42 @@ export function useBinanceStream() {
 
                         // AUDIO TRIGGER LOGIC
                         // Only trigger if not muted and volatility is significant
-                        if (!isMuted) {
-                            // If Daily Change is high (> 5%) and volume is significant, trigger random ping
-                            // This simulates "activity" on hot coins
-                            if (Math.abs(percentChange) > 5) {
-                                if (Math.random() > 0.95) { // 5% chance per tick per hot coin to ping (Rate limited by Engine)
-                                    if (percentChange > 0) {
-                                        soundEngine.current.playPing(Math.min(percentChange / 20, 1.0));
-                                    } else {
-                                        soundEngine.current.playThud(Math.min(Math.abs(percentChange) / 20, 1.0));
-                                    }
+                        if (!useMarketStore.getState().isMuted) {
+                            // ... (keep exact audio logic reference)
+                            // Re-implementing simplified access to store state for audio helper
+                            // Actually we can leave the Audio Logic as is, just need to ensure `isMuted` access
+                            const muted = useMarketStore.getState().isMuted;
+                            if (!muted && Math.abs(percentChange) > 5) {
+                                if (Math.random() > 0.95) {
+                                    if (percentChange > 0) soundEngine.current.playPing(Math.min(percentChange / 20, 1.0));
+                                    else soundEngine.current.playThud(Math.min(Math.abs(percentChange) / 20, 1.0));
                                 }
                             }
                         }
 
                         // Handle Dynamic Timeframe Logic
-                        // Note: In a real-world high-freq app, we wouldnt await fetch inside the loop like this
-                        // We would have a background worker updating the "Base Prices" for the active timeframe
-                        // For MVP, we use the cached open price if available, or just stick to 24h if fetching needed
-                        // To prevent lag, we simply don't await here, we just use what we have or schedule a fetch?
-                        // Actually, for thousands of coins, we cannot fetch 1h candle for all instantly.
-                        // PROPOSAL: Only fetch for 'Selected' or just stick to 24h for MVP V2 optimization.
-                        // IMPLEMENTATION: We will stick to 24h for the *stream* unless we have a base price ready.
+                        // For 1h/4h/etc, we *should* check TimeframeManager
+                        // But strictly for this optimization, we maintain 24h P for now unless we implement the Bulk Fetch
+                        // If logic was advanced:
+                        // if (currentTimeframe !== '24h') { percentChange = await timeframeManager.current.getChange(...) }
 
-                        // Just update the Map directly
                         const finalData: TickerData = {
                             symbol: ticker.s,
                             price: price,
                             volume: volume,
                             priceChangePercent: percentChange,
-                            timeFrame: timeframe, // Use store timeframe
+                            timeFrame: currentTimeframe,
                         };
 
                         streamStore.tickers.set(ticker.s, finalData);
 
+                        // ...
                         if (shouldUpdateUI) {
                             uiBatch.push(finalData);
                         }
                     }
 
-                    // Notify WebGL Subscribers (Raf Loop checks this Map, or we emit event)
-                    // Actually, we don't even need to emit if the Canvas component polls the Map in its Tick loop.
-                    // But emitting allows us to notify "Changes occurred"
-                    // streamStore.emit(); 
-
-                    // Throttled UI State Update (For Drawer/HUD)
+                    // ...
                     if (shouldUpdateUI && uiBatch.length > 0) {
                         updateBatch(uiBatch);
                         lastUiUpdate.current = now;
@@ -123,6 +123,7 @@ export function useBinanceStream() {
                 }
             };
 
+            // ... (rest of socket events)
             wsRef.current.onclose = () => {
                 console.warn('[Liquidity Nebula] Disconnected. Reconnecting in 3s...');
                 reconnectTimeout = setTimeout(connect, 3000);
@@ -140,5 +141,5 @@ export function useBinanceStream() {
             wsRef.current?.close();
             clearTimeout(reconnectTimeout);
         };
-    }, [updateBatch, timeframe]);
+    }, [updateBatch]); // Timeframe removed from deps to prevent reconnect
 }

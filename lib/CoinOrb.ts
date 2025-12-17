@@ -21,6 +21,7 @@ export class CoinOrb {
         this.sprite.anchor.set(0.5);
         this.sprite.x = startX;
         this.sprite.y = startY;
+        this.targetY = startY; // Initialize target
 
         // Size based on volume (Square root to dampen huge differences)
         // Base scale 0.1, max scale cap around 0.5
@@ -94,13 +95,19 @@ export class CoinOrb {
     }
 
     animate() {
-        // Smooth Physics for Y position (Spring/Damper)
+        // LERP (Linear Interpolation) for Smooth Easing
+        // Standard formula: current = current + (target - current) * ease
+        const ease = 0.08; // 0.05=Heavy, 0.1=Standard, 0.2=Snappy
         const dy = this.targetY - this.sprite.y;
-        this.velocityY += dy * this.spring;
-        this.velocityY *= this.friction;
-        this.sprite.y += this.velocityY;
 
-        // Optional: Subtle floating wobble
-        // this.sprite.x += Math.sin(Date.now() * 0.001 + this.sprite.y) * 0.1;
+        // Optimization: Stop computing if very close
+        if (Math.abs(dy) < 0.5) {
+            this.sprite.y = this.targetY;
+        } else {
+            this.sprite.y += dy * ease;
+        }
+
+        // Optional: Subtle floating wobble (Breathing effect)
+        // this.sprite.x += Math.sin(Date.now() * 0.001 + this.sprite.y * 0.01) * 0.2;
     }
 }

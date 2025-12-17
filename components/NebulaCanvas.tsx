@@ -14,7 +14,14 @@ export default function NebulaCanvas() {
     const textureRef = useRef<PIXI.Texture | null>(null);
 
     // Only subscribe to LOW FREQUENCY updates if needed, or just read imperatively
-    const { searchQuery, setSelectedTicker } = useMarketStore();
+    const { searchQuery, setSelectedTicker, timeframe } = useMarketStore();
+    const timeframeRef = useRef(timeframe);
+
+    // Sync Ref for Layout (avoid re-running effect just for var change)
+    useEffect(() => {
+        timeframeRef.current = timeframe;
+    }, [timeframe]);
+
 
     // Create shared texture once
     const createOrbTexture = (app: PIXI.Application) => {
@@ -68,8 +75,17 @@ export default function NebulaCanvas() {
                 const screenWidth = app.screen.width;
                 const texture = textureRef.current!;
 
-                const hasQuery = useMarketStore.getState().searchQuery.length > 0;
-                const query = useMarketStore.getState().searchQuery;
+                const state = useMarketStore.getState();
+                const hasQuery = state.searchQuery.length > 0;
+                const query = state.searchQuery;
+                const activeTimeframe = state.timeframe;
+
+                // Dynamic Scale Factor based on Timeframe Volatility
+                // 1m/15m have small % changes, so we need higher visual scale to see movement
+                let scaleFactor = 15; // Default 24h/7d
+                if (activeTimeframe === '1h') scaleFactor = 40;
+                else if (activeTimeframe === '15m') scaleFactor = 80;
+                else if (activeTimeframe === '1m') scaleFactor = 150;
 
                 // Iterate over ALL tickers in the Stream Store
                 streamStore.tickers.forEach((data, symbol) => {
@@ -87,7 +103,7 @@ export default function NebulaCanvas() {
                     }
 
                     // Update Data (Position Target)
-                    orb.updateData(data, screenCenterY);
+                    orb.updateData(data, screenCenterY, scaleFactor);
 
                     // Update Highlight (Imperative check)
                     const isMatch = !hasQuery || symbol.includes(query);
