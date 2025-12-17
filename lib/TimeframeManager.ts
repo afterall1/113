@@ -7,8 +7,8 @@ export class TimeframeManager {
     async fetchBaselines(symbols: string[], timeframe: string): Promise<Map<string, number>> {
         const baselineMap = new Map<string, number>();
 
-        // Sadece USDT paritelerini filtrele (Gürültüyü azalt)
-        const targetSymbols = symbols.filter(s => s.endsWith('USDT'));
+        // FETCH ALL (No filter) - User may have non-USDT pairs
+        const targetSymbols = symbols;
 
         // 20'li paketlere böl (Batching)
         const batches = this.chunkArray(targetSymbols, 20);
