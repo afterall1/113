@@ -1,4 +1,7 @@
-# Liquidity Nebula - PROJECT BIBLE
+# Liquidity Nebula Project Bible
+> [!IMPORTANT]
+> **Status**: v1.0.0 RELEASE CANDIDATE
+> **Date**: 2025-12-18
 
 ## 1. Core Logic
 - **Dynamic Percent Change**: The application must calculate percentage changes dynamically based on user selection (e.g., 1m, 5m, 15m, 1h, 4h, 1d). The visualization should update instantly to reflect the selected volatility timeframe.
