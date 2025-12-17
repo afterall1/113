@@ -16,3 +16,4 @@ This document locks the core technology versions for the Liquidity Nebula projec
 ## State & Data
 - **SWR / React Query**: Recommended for caching (TBD)
 - **WebSocket**: Native browser WebSocket API
+- **Constraint**: `useState` forbidden for socket streams. Use `Ref` + `Subscribers`.

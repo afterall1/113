@@ -23,3 +23,9 @@ interface TickerData {
   timeFrame: string;          // e.g., "1m", "15m", "1h"
 }
 ```
+
+## 4. Architecture Standards
+- **Transient Update Pattern**: For high-frequency data (WebSocket > 10Hz), DO NOT use React State (`useState`) to drive the render loop.
+  - **Storage**: Use `Mutable Ref` or `Map` outside React Cycle.
+  - **Rendering**: Read directly from storage in `requestAnimationFrame` or `PixiTicker`.
+  - **State**: Only use `Zustand/Context` for low-frequency UI updates (Selection, filtering).

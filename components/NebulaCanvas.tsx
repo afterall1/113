@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import * as PIXI from 'pixi.js';
 import { useMarketStore } from '@/store/useMarketStore';
 import { CoinOrb } from '@/lib/CoinOrb';
+import { streamStore } from '@/hooks/useBinanceStream';
 
 export default function NebulaCanvas() {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -12,7 +13,8 @@ export default function NebulaCanvas() {
     const mainContainerRef = useRef<PIXI.Container | null>(null);
     const textureRef = useRef<PIXI.Texture | null>(null);
 
-    const { tickers, searchQuery, setSelectedTicker } = useMarketStore();
+    // Only subscribe to LOW FREQUENCY updates if needed, or just read imperatively
+    const { searchQuery, setSelectedTicker } = useMarketStore();
 
     // Create shared texture once
     const createOrbTexture = (app: PIXI.Application) => {
@@ -59,12 +61,44 @@ export default function NebulaCanvas() {
             // Store texture in Ref
             textureRef.current = createOrbTexture(app);
 
-            // Animation Loop
+            // MAIN RENDER LOOP (60 FPS)
+            // Reads directly from Mutable Ref (streamStore)
             app.ticker.add(() => {
-                orbsRef.current.forEach((orb) => orb.animate());
-            });
+                const screenCenterY = app.screen.height / 2;
+                const screenWidth = app.screen.width;
+                const texture = textureRef.current!;
 
-            // Handle Resize logic if needed specifically beyond resizeTo
+                const hasQuery = useMarketStore.getState().searchQuery.length > 0;
+                const query = useMarketStore.getState().searchQuery;
+
+                // Iterate over ALL tickers in the Stream Store
+                streamStore.tickers.forEach((data, symbol) => {
+                    let orb = orbsRef.current.get(symbol);
+
+                    // Create if missing
+                    if (!orb) {
+                        const x = Math.random() * screenWidth;
+                        orb = new CoinOrb(data, texture, x, screenCenterY);
+                        orb.bindInteraction((clickedData) => {
+                            useMarketStore.getState().setSelectedTicker(clickedData);
+                        });
+                        mainContainerRef.current!.addChild(orb.sprite);
+                        orbsRef.current.set(symbol, orb);
+                    }
+
+                    // Update Data (Position Target)
+                    orb.updateData(data, screenCenterY);
+
+                    // Update Highlight (Imperative check)
+                    const isMatch = !hasQuery || symbol.includes(query);
+                    orb.highlight(isMatch, hasQuery);
+
+                    // Animate Physics
+                    orb.animate();
+                });
+
+                // Cleanup stale orbs? (Optional for now)
+            });
         };
 
         initApp();
@@ -76,53 +110,7 @@ export default function NebulaCanvas() {
                 appRef.current = null;
             }
         };
-    }, []);
-
-    // Sync Data with Visuals
-    useEffect(() => {
-        if (!appRef.current || !mainContainerRef.current || !textureRef.current) return;
-
-        const app = appRef.current;
-        const container = mainContainerRef.current;
-        const texture = textureRef.current;
-        const existingOrbs = orbsRef.current;
-
-        const screenCenterY = app.screen.height / 2;
-        const screenWidth = app.screen.width;
-
-        // Check filtered query
-        const hasQuery = searchQuery.length > 0;
-
-        tickers.forEach((data, symbol) => {
-            let orb = existingOrbs.get(symbol);
-
-            if (!orb) {
-                const x = Math.random() * screenWidth;
-                const y = screenCenterY;
-
-                orb = new CoinOrb(data, texture, x, y);
-                // Bind Interaction
-                orb.bindInteraction((clickedData) => {
-                    setSelectedTicker(clickedData);
-                });
-
-                container.addChild(orb.sprite);
-                existingOrbs.set(symbol, orb);
-            }
-
-            // Update Physics Target
-            orb.updateData(data, screenCenterY);
-
-            // Update Highlighting
-            const isMatch = !hasQuery || symbol.includes(searchQuery);
-            orb.highlight(isMatch, hasQuery);
-        });
-
-        // Cleanup stale orbs (if tickers removed from stream?)
-        // In this specific stream, tickers usually persist, but good practice:
-        // ... logic to remove orbs not in tickers ...
-
-    }, [tickers, searchQuery, setSelectedTicker]); // React to store updates
+    }, []); // Empty dependency array = Single Mount!
 
     return (
         <div

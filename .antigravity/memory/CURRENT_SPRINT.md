@@ -26,3 +26,15 @@
 ## Next Steps
 - Implement `LiquidityNebula` visualization component.
 - Connect valid state to PixiJS renderer.
+
+## Optimization Phase (Sprint 1.5)
+### 1. Transient Updates (Ref Pattern)
+- **Problem**: `useState` caused re-renders on every tick.
+- **Solution**: `useBinanceStream` writes to a mutable `streamStore`.
+- **Canvas**: `NebulaCanvas` reads `streamStore` inside the Pixi ticker loop (60 FPS).
+- **Result**: Zero React re-renders for socket data.
+
+### 2. Timeframe Manager (`lib/TimeframeManager.ts`)
+- **Logic**: Fetches historical `Open Price` for 1h/4h calculation.
+- **Cache**: 1-hour TTL for base prices.
+- **Integration**: Hook uses manager to calculate dynamic %.
