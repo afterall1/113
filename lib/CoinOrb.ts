@@ -40,20 +40,20 @@ export class CoinOrb {
         this.sprite.on('pointerleave', () => this.setHover(false));
     }
 
-    updateData(newData: TickerData, screenCenterY: number, scaleFactor: number = 15) {
+    updateData(newData: TickerData, screenCenterY: number, scaleFactor: number = 15, overridePercent?: number) {
         this.data = newData;
-        // Don't call updateColor here blindly if we want to respect search query dimming 
-        // We'll handle color updates via specific highlighting logic or check state
-        // For now, let's keep it simple: Base color depends on price change.
-        // Opacity depends on search.
-        this.updateBaseTint();
+
+        // Determine value to display/calculate
+        const displayPercent = overridePercent !== undefined ? overridePercent : this.data.priceChangePercent;
+
+        this.updateBaseTint(displayPercent);
 
         // Calculate Target Y
-        this.targetY = screenCenterY - (this.data.priceChangePercent * scaleFactor);
+        this.targetY = screenCenterY - (displayPercent * scaleFactor);
     }
 
-    private updateBaseTint() {
-        if (this.data.priceChangePercent >= 0) {
+    private updateBaseTint(percent: number = this.data.priceChangePercent) {
+        if (percent >= 0) {
             // Gainers: Green/Teal (Simple tint for now)
             this.sprite.tint = 0x00ffcc;
         } else {

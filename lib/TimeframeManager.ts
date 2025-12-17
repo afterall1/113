@@ -18,14 +18,50 @@ export class TimeframeManager {
     };
 
     /**
+     * Bulk fetch baseline prices for multiple symbols.
+     * Use sparingly to avoid rate limits.
+     */
+    async fetchBaselines(symbols: string[], timeframe: string): Promise<Map<string, number>> {
+        const resultMap = new Map<string, number>();
+        const interval = this.INTERVAL_MAP[timeframe];
+
+        if (!interval || timeframe === '24h') return resultMap;
+
+        // BATCHING: Binance doesn't support multi-symbol klines in one call easily like tickers.
+        // We must call per symbol.
+        // LIMIT: Browser allows ~6 connections. We need to throttle.
+        // Optimization: We will just try Promise.all with a slice for MVP, or sequential.
+        // PROPER APPROACH: A helper to run X requests in parallel.
+
+        const CHUNK_SIZE = 10;
+        const chunks = [];
+        for (let i = 0; i < symbols.length; i += CHUNK_SIZE) {
+            chunks.push(symbols.slice(i, i + CHUNK_SIZE));
+        }
+
+        for (const chunk of chunks) {
+            await Promise.all(chunk.map(async (symbol) => {
+                try {
+                    const price = await this.fetchBasePrice(symbol, timeframe);
+                    if (price !== null) {
+                        resultMap.set(symbol, price);
+                    }
+                } catch (e) {
+                    // Fail silent per symbol
+                }
+            }));
+            // Small delay to be nice to API
+            await new Promise(r => setTimeout(r, 50));
+        }
+
+        return resultMap;
+    }
+
+    /**
      * Get the Open Price for the start of the timeframe.
-     * e.g. If timeframe is 1h, get price at start of current hour? 
-     * Or Open Price of the LAST 1h Candle? 
-     * Usually "1h Change" means Current Price vs Price 1h ago.
-     * Binance Klines gives us the open of the candle.
-     * Let's assume we want "Percent change from the Open of the [Timeframe] Candle".
      */
     async fetchBasePrice(symbol: string, timeframe: string): Promise<number | null> {
+        // ... (rest of method same)
         // For 24h, we can use the stream data directly, no need to fetch
         if (timeframe === '24h') return null;
 

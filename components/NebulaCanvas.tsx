@@ -79,6 +79,7 @@ export default function NebulaCanvas() {
                 const hasQuery = state.searchQuery.length > 0;
                 const query = state.searchQuery;
                 const activeTimeframe = state.timeframe;
+                const baselines = state.baselines;
 
                 // Dynamic Scale Factor based on Timeframe Volatility
                 // 1m/15m have small % changes, so we need higher visual scale to see movement
@@ -102,8 +103,18 @@ export default function NebulaCanvas() {
                         orbsRef.current.set(symbol, orb);
                     }
 
+                    // Calculation Logic: Timeframe Overrides
+                    let visualPercent: number | undefined;
+
+                    if (activeTimeframe !== '24h') {
+                        const base = baselines.get(symbol);
+                        if (base) {
+                            visualPercent = ((data.price - base) / base) * 100;
+                        }
+                    }
+
                     // Update Data (Position Target)
-                    orb.updateData(data, screenCenterY, scaleFactor);
+                    orb.updateData(data, screenCenterY, scaleFactor, visualPercent);
 
                     // Update Highlight (Imperative check)
                     const isMatch = !hasQuery || symbol.includes(query);

@@ -7,11 +7,13 @@ interface MarketState {
     searchQuery: string;
     timeframe: string;
     isMuted: boolean;
+    baselines: Map<string, number>;
     updateBatch: (newTickers: TickerData[]) => void;
     setSelectedTicker: (ticker: TickerData | null) => void;
     setSearchQuery: (query: string) => void;
     setTimeframe: (tf: string) => void;
     setIsMuted: (muted: boolean) => void;
+    setBaselines: (baselines: Map<string, number>) => void;
 }
 
 export const useMarketStore = create<MarketState>((set) => ({
@@ -20,6 +22,7 @@ export const useMarketStore = create<MarketState>((set) => ({
     searchQuery: '',
     timeframe: '24h',
     isMuted: true, // Start muted
+    baselines: new Map(),
     updateBatch: (newTickers) =>
         set((state) => {
             const updatedMap = new Map(state.tickers);
@@ -32,4 +35,5 @@ export const useMarketStore = create<MarketState>((set) => ({
     setSearchQuery: (query) => set({ searchQuery: query }),
     setTimeframe: (tf) => set({ timeframe: tf }),
     setIsMuted: (muted) => set({ isMuted: muted }),
+    setBaselines: (baselines) => set({ baselines }),
 }));

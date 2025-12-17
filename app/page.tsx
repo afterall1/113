@@ -7,6 +7,7 @@ import HUD from "@/components/HUD";
 import DetailDrawer from "@/components/DetailDrawer";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { useBinanceStream, streamStore } from "@/hooks/useBinanceStream";
+import { useTimeframeSync } from "@/hooks/useTimeframeSync";
 
 export default function Home() {
   const [isBooted, setIsBooted] = useState(false);
@@ -14,6 +15,8 @@ export default function Home() {
 
   // Activate Data Stream
   useBinanceStream();
+  // Activate Timeframe Logic
+  useTimeframeSync();
 
   // Boot Sequence Logic
   useEffect(() => {
