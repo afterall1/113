@@ -3,11 +3,28 @@
 export class TimeframeManager {
     private baseUrl = 'https://api.binance.com/api/v3';
 
+    // Interval to Binance Kline Interval map
+    private readonly INTERVAL_MAP: Record<string, string> = {
+        '1m': '1m',
+        '15m': '15m',
+        '1h': '1h',
+        '4h': '4h',
+        // '24h': '1d', // Filtered out before calling this
+        '7d': '1w'
+    };
+
     // Verilen sembol listesi için "Open Price" verilerini çeker
     async fetchBaselines(symbols: string[], timeframe: string): Promise<Map<string, number>> {
         const baselineMap = new Map<string, number>();
 
-        // FETCH ALL (No filter) - User may have non-USDT pairs
+        // Map timeframe to Binance interval
+        const interval = this.INTERVAL_MAP[timeframe];
+        if (!interval) {
+            console.warn(`[TimeframeManager] Invalid or unsupported timeframe: ${timeframe}`);
+            return baselineMap; // Return empty if not supported
+        }
+
+        // Sadece USDT paritelerini filtrele (Gürültüyü azalt) - User wanted ALL now
         const targetSymbols = symbols;
 
         // 20'li paketlere böl (Batching)
@@ -17,8 +34,8 @@ export class TimeframeManager {
         for (const batch of batches) {
             await Promise.all(batch.map(async (symbol) => {
                 try {
-                    // Limit=1 ve Interval=timeframe ile son mumu çek
-                    const res = await fetch(`${this.baseUrl}/klines?symbol=${symbol}&interval=${timeframe}&limit=1`);
+                    // Limit=1 ve Interval=mappedInterval ile son mumu çek
+                    const res = await fetch(`${this.baseUrl}/klines?symbol=${symbol}&interval=${interval}&limit=1`);
 
                     if (!res.ok) return; // Hata veren coini atla
 
