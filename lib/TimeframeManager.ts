@@ -1,4 +1,4 @@
-import { chunk } from '@/lib/buffer'; // Eğer buffer.ts'de chunk yoksa aşağıya ekledim.
+
 
 export class TimeframeManager {
     private baseUrl = 'https://api.binance.com/api/v3';
