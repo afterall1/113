@@ -46,6 +46,11 @@ export class CoinOrb {
         // Determine value to display/calculate
         const displayPercent = overridePercent !== undefined ? overridePercent : this.data.priceChangePercent;
 
+        // CRITICAL FIX: Update the data object so that UI components (DetailDrawer) see the corrected %
+        if (overridePercent !== undefined) {
+            this.data.priceChangePercent = overridePercent;
+        }
+
         this.updateBaseTint(displayPercent);
 
         // Calculate Target Y
