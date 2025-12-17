@@ -30,26 +30,29 @@ import { SoundEngine } from '@/lib/SoundEngine';
 
 export function useBinanceStream() {
     const updateBatch = useMarketStore((state) => state.updateBatch);
-    const timeframe = useMarketStore((state) => state.timeframe);
-    const isMuted = useMarketStore((state) => state.isMuted);
+
+    // 1. Refs to access latest state/functions without re-running Effect
+    const updateBatchRef = useRef(updateBatch);
+    const timeframe = useMarketStore((state) => state.timeframe); // Just for specific optimization if needed
+    const timeframeRef = useRef(timeframe);
+
+    // Keep Refs synced
+    useEffect(() => { updateBatchRef.current = updateBatch; }, [updateBatch]);
+    useEffect(() => { timeframeRef.current = timeframe; }, [timeframe]);
 
     const wsRef = useRef<WebSocket | null>(null);
-    const timeframeManager = useRef(new TimeframeManager());
     const soundEngine = useRef(SoundEngine.getInstance());
-
-    // Throttled UI Update Ref
     const lastUiUpdate = useRef(0);
 
-    // Use Ref to access latest timeframe inside callback without triggering effect re-run
-    const timeframeRef = useRef(timeframe);
-    useEffect(() => {
-        timeframeRef.current = timeframe;
-    }, [timeframe]);
-
+    // 2. Main Connection Effect - ZERO DEPENDENCIES [ ]
     useEffect(() => {
         let reconnectTimeout: NodeJS.Timeout;
+        let isUnmounted = false;
 
         const connect = () => {
+            if (isUnmounted) return;
+
+            console.log('[Liquidity Nebula] Initializing WebSocket...');
             wsRef.current = new WebSocket(BINANCE_WS_URL);
 
             wsRef.current.onopen = () => {
@@ -57,31 +60,26 @@ export function useBinanceStream() {
             };
 
             wsRef.current.onmessage = async (event) => {
+                if (isUnmounted) return;
                 try {
                     const rawData: BinanceTickerPayload[] = JSON.parse(event.data);
                     const now = Date.now();
-                    const shouldUpdateUI = now - lastUiUpdate.current > 1000; // 1s UI Throttle
+                    const shouldUpdateUI = now - lastUiUpdate.current > 1000;
                     const uiBatch: TickerData[] = [];
 
-                    // Access latest timeframe via Ref
-                    const currentTimeframe = timeframeRef.current;
+                    const currentTimeframe = timeframeRef.current; // Read from Ref
 
                     for (const ticker of rawData) {
-                        // Filter
                         if (!ticker.s.endsWith(TARGET_QUOTE_ASSET)) continue;
                         const volume = parseFloat(ticker.q);
                         if (volume < MIN_QUOTE_VOLUME) continue;
 
                         const price = parseFloat(ticker.c);
-                        let percentChange = parseFloat(ticker.P);
+                        const percentChange = parseFloat(ticker.P);
 
-                        // AUDIO TRIGGER LOGIC
-                        // Only trigger if not muted and volatility is significant
+                        // Sound Logic
                         if (!useMarketStore.getState().isMuted) {
-                            // ... (keep exact audio logic reference)
-                            // Re-implementing simplified access to store state for audio helper
-                            // Actually we can leave the Audio Logic as is, just need to ensure `isMuted` access
-                            const muted = useMarketStore.getState().isMuted;
+                            const muted = useMarketStore.getState().isMuted; // Double check
                             if (!muted && Math.abs(percentChange) > 5) {
                                 if (Math.random() > 0.95) {
                                     if (percentChange > 0) soundEngine.current.playPing(Math.min(percentChange / 20, 1.0));
@@ -89,12 +87,6 @@ export function useBinanceStream() {
                                 }
                             }
                         }
-
-                        // Handle Dynamic Timeframe Logic
-                        // For 1h/4h/etc, we *should* check TimeframeManager
-                        // But strictly for this optimization, we maintain 24h P for now unless we implement the Bulk Fetch
-                        // If logic was advanced:
-                        // if (currentTimeframe !== '24h') { percentChange = await timeframeManager.current.getChange(...) }
 
                         const finalData: TickerData = {
                             symbol: ticker.s,
@@ -106,15 +98,16 @@ export function useBinanceStream() {
 
                         streamStore.tickers.set(ticker.s, finalData);
 
-                        // ...
                         if (shouldUpdateUI) {
                             uiBatch.push(finalData);
                         }
                     }
 
-                    // ...
                     if (shouldUpdateUI && uiBatch.length > 0) {
-                        updateBatch(uiBatch);
+                        // Call via Ref to avoid closure staleness
+                        if (updateBatchRef.current) {
+                            updateBatchRef.current(uiBatch);
+                        }
                         lastUiUpdate.current = now;
                     }
 
@@ -123,10 +116,11 @@ export function useBinanceStream() {
                 }
             };
 
-            // ... (rest of socket events)
             wsRef.current.onclose = () => {
                 console.warn('[Liquidity Nebula] Disconnected. Reconnecting in 3s...');
-                reconnectTimeout = setTimeout(connect, 3000);
+                if (!isUnmounted) {
+                    reconnectTimeout = setTimeout(connect, 3000);
+                }
             };
 
             wsRef.current.onerror = (error) => {
@@ -138,8 +132,10 @@ export function useBinanceStream() {
         connect();
 
         return () => {
-            wsRef.current?.close();
+            isUnmounted = true;
+            console.log('[Liquidity Nebula] Cleaning up WebSocket...');
+            if (wsRef.current) wsRef.current.close();
             clearTimeout(reconnectTimeout);
         };
-    }, [updateBatch]); // Timeframe removed from deps to prevent reconnect
+    }, []); // <--- ABSOLUTELY ZERO DEPENDENCIES. GUARANTEED STABILITY.
 }
