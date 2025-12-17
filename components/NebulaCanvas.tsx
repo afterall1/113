@@ -126,6 +126,13 @@ export default function NebulaCanvas() {
                     const isMatch = !hasQuery || symbol.includes(query);
                     orb.highlight(isMatch, hasQuery);
 
+                    // Update Favorite Status
+                    // Optimization: We could cache the Set outside the loop if performance drops,
+                    // but for <1000 items, generic array includes or Set lookup is fast enough here.
+                    // Accessing raw store state inside loop is okay for this.
+                    const isFav = useMarketStore.getState().favorites.includes(symbol);
+                    orb.setFavorite(isFav);
+
                     // Animate Physics
                     orb.animate();
                 });

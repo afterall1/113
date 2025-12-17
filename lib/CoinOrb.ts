@@ -58,12 +58,29 @@ export class CoinOrb {
     }
 
     private updateBaseTint(percent: number = this.data.priceChangePercent) {
-        if (percent >= 0) {
-            // Gainers: Green/Teal (Simple tint for now)
+        if (this.isFavorite) {
+            // GOLD for Favorites
+            this.sprite.tint = 0xFFD700;
+            this.sprite.zIndex = 50; // Above normal (1), below hover (100)
+            this.sprite.alpha = 1.0;
+        } else if (percent >= 0) {
+            // Gainers: Green/Teal
             this.sprite.tint = 0x00ffcc;
+            this.sprite.zIndex = 1;
         } else {
             // Losers: Red/Orange
             this.sprite.tint = 0xff3366;
+            this.sprite.zIndex = 1;
+        }
+    }
+
+    private isFavorite: boolean = false;
+
+    setFavorite(isFav: boolean) {
+        if (this.isFavorite !== isFav) {
+            this.isFavorite = isFav;
+            // Re-apply tint immediately
+            this.updateBaseTint(this.data.priceChangePercent);
         }
     }
 

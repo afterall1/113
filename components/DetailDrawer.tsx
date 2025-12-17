@@ -54,10 +54,14 @@ export default function DetailDrawer() {
                         </div>
                     </div>
 
-                    <div className="flex gap-2">
+                    <div className="flex items-center gap-2">
+                        {/* Favorite Button */}
                         <button
                             onClick={() => selectedTicker && toggleFavorite(selectedTicker.symbol)}
-                            className={`p-2 rounded-full transition-colors ${favorites.includes(selectedTicker?.symbol || '') ? 'text-yellow-400 bg-yellow-400/10' : 'text-zinc-600 hover:text-zinc-400'}`}
+                            className={`p-2 rounded-full transition-all ${favorites.includes(selectedTicker?.symbol || '')
+                                ? 'text-yellow-400 bg-yellow-400/10 hover:bg-yellow-400/20'
+                                : 'text-zinc-600 hover:text-white hover:bg-white/10'
+                                }`}
                             title="Toggle Favorite"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill={favorites.includes(selectedTicker?.symbol || '') ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor">
