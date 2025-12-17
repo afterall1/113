@@ -27,16 +27,16 @@ export class TimeframeManager {
 
         if (!interval || timeframe === '24h') return resultMap;
 
-        // BATCHING: Binance doesn't support multi-symbol klines in one call easily like tickers.
-        // We must call per symbol.
-        // LIMIT: Browser allows ~6 connections. We need to throttle.
-        // Optimization: We will just try Promise.all with a slice for MVP, or sequential.
-        // PROPER APPROACH: A helper to run X requests in parallel.
+        // 1. Filter for USDT pairs only (Safety check)
+        const targetSymbols = symbols.filter(s => s.endsWith('USDT'));
 
-        const CHUNK_SIZE = 10;
+        // 2. Chunking Configuration
+        const CHUNK_SIZE = 20;
+        const DELAY_MS = 50;
+
         const chunks = [];
-        for (let i = 0; i < symbols.length; i += CHUNK_SIZE) {
-            chunks.push(symbols.slice(i, i + CHUNK_SIZE));
+        for (let i = 0; i < targetSymbols.length; i += CHUNK_SIZE) {
+            chunks.push(targetSymbols.slice(i, i + CHUNK_SIZE));
         }
 
         for (const chunk of chunks) {
@@ -50,8 +50,8 @@ export class TimeframeManager {
                     // Fail silent per symbol
                 }
             }));
-            // Small delay to be nice to API
-            await new Promise(r => setTimeout(r, 50));
+            // Rate Limiting Delay
+            await new Promise(r => setTimeout(r, DELAY_MS));
         }
 
         return resultMap;

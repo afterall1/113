@@ -110,6 +110,11 @@ export default function NebulaCanvas() {
                         const base = baselines.get(symbol);
                         if (base) {
                             visualPercent = ((data.price - base) / base) * 100;
+                        } else {
+                            // STRICT MODE: If we are in a specific timeframe but have NO data yet,
+                            // do NOT show the 24h percent. That is misleading.
+                            // Decision: Set to 0 so it floats to center and "waits" there.
+                            visualPercent = 0;
                         }
                     }
 

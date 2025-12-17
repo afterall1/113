@@ -19,13 +19,9 @@ export function useTimeframeSync() {
             const symbols = Array.from(streamStore.tickers.keys());
             if (symbols.length === 0) return;
 
-            // Sort by volume? Or just take top 100 to avoid killing API?
-            // For MVP, lets try to fetch all but verify performance later.
-            // Limiting to Top 50 by volume for safety is a good heuristic.
-            const topSymbols = Array.from(streamStore.tickers.values())
-                .sort((a, b) => b.volume - a.volume)
-                .slice(0, 50)
-                .map(d => d.symbol);
+            // Fetch ALL USDT tickers (Filtering happens in Manager or Stream)
+            // No limit applied.
+            const topSymbols = Array.from(streamStore.tickers.keys());
 
             console.log(`[TimeframeSync] Fetching baselines for ${topSymbols.length} tickers on ${timeframe}...`);
             const baselines = await managerRef.current.fetchBaselines(topSymbols, timeframe);
