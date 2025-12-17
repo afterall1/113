@@ -7,46 +7,56 @@ export function useTimeframeSync() {
     const timeframe = useMarketStore(state => state.timeframe);
     const setBaselines = useMarketStore(state => state.setBaselines);
     const managerRef = useRef(new TimeframeManager());
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+    // Temizlik (Cleanup)
+    useEffect(() => {
+        return () => {
+            if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        };
+    }, []);
 
     useEffect(() => {
-        let timeoutId: NodeJS.Timeout;
-        let intervalId: NodeJS.Timeout;
-
-        // If 24h, we rely on stream "P" (PriceChangePercent), no baselines needed.
+        // Eğer 24h seçiliyse, baseline çekmeye gerek yok.
         if (timeframe === '24h') {
             setBaselines(new Map());
+            if (timeoutRef.current) clearTimeout(timeoutRef.current);
             return;
         }
 
-        const runSync = async () => {
-            // Fetch ALL USDT tickers (Filtering happens in Manager or Stream)
-            const symbols = Array.from(streamStore.tickers.keys());
-            console.log(`[TimeframeSync] Sending ${symbols.length} tickers to Manager...`);
+        const sync = async () => {
+            // 1. WebSocket'ten gelen coin listesini al
+            const allSymbols = Array.from(streamStore.tickers.keys());
 
-            const baselines = await managerRef.current.fetchBaselines(symbols, timeframe);
-            setBaselines(baselines);
-            console.log(`[TimeframeSync] Updated ${baselines.size} baselines.`);
-        };
+            // 2. SMART POLLING: Eğer liste boşsa (Henüz bağlanmadıysa), 1 sn bekle ve tekrar dene.
+            if (allSymbols.length < 5) {
+                console.log(`[TimeframeSync] Waiting for socket data... (${allSymbols.length} tickers)`);
+                timeoutRef.current = setTimeout(sync, 1000);
+                return;
+            }
 
-        const tryInitialSync = () => {
-            const count = streamStore.tickers.size;
-            if (count < 5) {
-                console.warn(`[TimeframeSync] Stream cold (${count} tickers). Waiting 1s...`);
-                timeoutId = setTimeout(tryInitialSync, 1000);
-            } else {
-                console.log(`[TimeframeSync] Stream ready (${count} tickers). Starting sync.`);
-                runSync();
-                // Start Interval only after success
-                intervalId = setInterval(runSync, 5 * 60 * 1000); // 5 Minutes
+            // 3. Veri geldiyse, LIMITSIZ olarak hepsini çek.
+            console.log(`[TimeframeSync] Fetching baselines for ${allSymbols.length} tickers on ${timeframe}...`);
+
+            try {
+                // TimeframeManager içindeki batching (parçalı çekim) fonksiyonunu kullan
+                const baselines = await managerRef.current.fetchBaselines(allSymbols, timeframe);
+                setBaselines(baselines);
+                console.log(`[TimeframeSync] Success! Updated ${baselines.size} baselines.`);
+            } catch (error) {
+                console.error("[TimeframeSync] Error fetching baselines:", error);
             }
         };
 
-        // Start waiting/sync logic
-        tryInitialSync();
+        // İlk başlatma
+        sync();
+
+        // 5 Dakikada bir güncelle (300.000 ms)
+        const interval = setInterval(sync, 5 * 60 * 1000);
 
         return () => {
-            clearTimeout(timeoutId);
-            clearInterval(intervalId);
+            clearInterval(interval);
+            if (timeoutRef.current) clearTimeout(timeoutRef.current);
         };
     }, [timeframe, setBaselines]);
 }
