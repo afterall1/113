@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -15,12 +15,13 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Liquidity Nebula | Real-time Crypto Visualizer",
   description: "Interactive 2D WebGL visualization of Binance market data. Track top gainers and losers in real-time.",
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false, // Prevent zoom on mobile double-tap for app-like feel
-  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false, // Prevent zoom on mobile double-tap for app-like feel
 };
 
 export default function RootLayout({
