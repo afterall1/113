@@ -84,9 +84,10 @@ export default function NebulaCanvas() {
                 // Dynamic Scale Factor based on Timeframe Volatility
                 // 1m/15m have small % changes, so we need higher visual scale to see movement
                 let scaleFactor = 15; // Default 24h/7d
-                if (activeTimeframe === '1h') scaleFactor = 40;
-                else if (activeTimeframe === '15m') scaleFactor = 80;
-                else if (activeTimeframe === '1m') scaleFactor = 150;
+                if (activeTimeframe === '4h') scaleFactor = 30;
+                else if (activeTimeframe === '1h') scaleFactor = 50;
+                else if (activeTimeframe === '15m') scaleFactor = 100;
+                else if (activeTimeframe === '1m') scaleFactor = 200;
 
                 // Iterate over ALL tickers in the Stream Store
                 streamStore.tickers.forEach((data, symbol) => {

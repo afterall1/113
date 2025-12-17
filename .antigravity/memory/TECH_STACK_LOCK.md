@@ -1,3 +1,6 @@
+# Tech Stack Lock
+...
+
 # TECH STACK LOCK
 This document locks the core technology versions for the Liquidity Nebula project to ensure consistency.
 

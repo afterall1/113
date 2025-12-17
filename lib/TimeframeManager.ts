@@ -11,9 +11,11 @@ export class TimeframeManager {
 
     // Interval to Binance Kline Interval map
     private readonly INTERVAL_MAP: Record<string, string> = {
+        '1m': '1m',
+        '15m': '15m',
         '1h': '1h',
         '4h': '4h',
-        '24h': '1d', // Should be 1d open for 24h change, or just use ticker 24h
+        '24h': '1d', // 1d open used for reference, though 24h stream uses rolling window
         '7d': '1w'
     };
 

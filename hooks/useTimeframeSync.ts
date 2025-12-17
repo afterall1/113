@@ -9,32 +9,44 @@ export function useTimeframeSync() {
     const managerRef = useRef(new TimeframeManager());
 
     useEffect(() => {
+        let timeoutId: NodeJS.Timeout;
+        let intervalId: NodeJS.Timeout;
+
         // If 24h, we rely on stream "P" (PriceChangePercent), no baselines needed.
         if (timeframe === '24h') {
             setBaselines(new Map());
             return;
         }
 
-        const syncBaselines = async () => {
-            const symbols = Array.from(streamStore.tickers.keys());
-            if (symbols.length === 0) return;
-
+        const runSync = async () => {
             // Fetch ALL USDT tickers (Filtering happens in Manager or Stream)
-            // No limit applied.
-            const topSymbols = Array.from(streamStore.tickers.keys());
+            const symbols = Array.from(streamStore.tickers.keys());
+            console.log(`[TimeframeSync] Sending ${symbols.length} tickers to Manager...`);
 
-            console.log(`[TimeframeSync] Fetching baselines for ${topSymbols.length} tickers on ${timeframe}...`);
-            const baselines = await managerRef.current.fetchBaselines(topSymbols, timeframe);
+            const baselines = await managerRef.current.fetchBaselines(symbols, timeframe);
             setBaselines(baselines);
             console.log(`[TimeframeSync] Updated ${baselines.size} baselines.`);
         };
 
-        // Initial Fetch
-        syncBaselines();
+        const tryInitialSync = () => {
+            const count = streamStore.tickers.size;
+            if (count < 5) {
+                console.warn(`[TimeframeSync] Stream cold (${count} tickers). Waiting 1s...`);
+                timeoutId = setTimeout(tryInitialSync, 1000);
+            } else {
+                console.log(`[TimeframeSync] Stream ready (${count} tickers). Starting sync.`);
+                runSync();
+                // Start Interval only after success
+                intervalId = setInterval(runSync, 5 * 60 * 1000); // 5 Minutes
+            }
+        };
 
-        // Interval (5 minutes)
-        const interval = setInterval(syncBaselines, 5 * 60 * 1000);
+        // Start waiting/sync logic
+        tryInitialSync();
 
-        return () => clearInterval(interval);
+        return () => {
+            clearTimeout(timeoutId);
+            clearInterval(intervalId);
+        };
     }, [timeframe, setBaselines]);
 }
