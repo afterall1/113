@@ -2,6 +2,9 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { TickerData } from '@/lib/types';
 
+// View Mode Type
+export type ViewMode = 'GLOBAL' | 'SQUADRON';
+
 interface MarketState {
     tickers: Map<string, TickerData>;
     selectedTicker: TickerData | null;
@@ -10,6 +13,8 @@ interface MarketState {
     isMuted: boolean;
     baselines: Map<string, number>;
     favorites: string[];
+    viewMode: ViewMode;
+    isWatchlistOpen: boolean;
 
     updateBatch: (newTickers: TickerData[]) => void;
     setSelectedTicker: (ticker: TickerData | null) => void;
@@ -18,6 +23,8 @@ interface MarketState {
     setIsMuted: (muted: boolean) => void;
     setBaselines: (baselines: Map<string, number>) => void;
     toggleFavorite: (symbol: string) => void;
+    setViewMode: (mode: ViewMode) => void;
+    setWatchlistOpen: (isOpen: boolean) => void;
 }
 
 export const useMarketStore = create<MarketState>()(
@@ -30,6 +37,8 @@ export const useMarketStore = create<MarketState>()(
             isMuted: true,
             baselines: new Map(),
             favorites: [],
+            viewMode: 'GLOBAL',
+            isWatchlistOpen: false,
 
             updateBatch: (newTickers) =>
                 set((state) => {
@@ -53,6 +62,10 @@ export const useMarketStore = create<MarketState>()(
                     : [...state.favorites, symbol];
                 return { favorites: newList };
             }),
+
+            setViewMode: (mode) => set({ viewMode: mode }),
+
+            setWatchlistOpen: (isOpen) => set({ isWatchlistOpen: isOpen }),
         }),
         {
             name: 'nebula-storage', // Unique name for LocalStorage key
@@ -60,8 +73,22 @@ export const useMarketStore = create<MarketState>()(
                 // ONLY persist these fields
                 favorites: state.favorites,
                 isMuted: state.isMuted,
-                timeframe: state.timeframe
+                timeframe: state.timeframe,
+                viewMode: state.viewMode,
             }),
         }
     )
 );
+
+// Helper: Get Squadron (Favorites) Tickers
+// Use this in components to filter tickers by favorites list
+export const getSquadronTickers = (state: MarketState): Map<string, TickerData> => {
+    const squadronMap = new Map<string, TickerData>();
+    state.favorites.forEach(symbol => {
+        const ticker = state.tickers.get(symbol);
+        if (ticker) {
+            squadronMap.set(symbol, ticker);
+        }
+    });
+    return squadronMap;
+};

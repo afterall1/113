@@ -1,12 +1,24 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useMarketStore } from "@/store/useMarketStore";
+import { streamStore } from "@/hooks/useBinanceStream";
 
 export default function WatchlistPanel() {
-    const { favorites, toggleFavorite, tickers, setSelectedTicker, timeframe } = useMarketStore();
-    const [isCollapsed, setIsCollapsed] = useState(false);
+    const { favorites, toggleFavorite, tickers, setSelectedTicker, timeframe, viewMode, setViewMode, isWatchlistOpen, setWatchlistOpen, baselines } = useMarketStore();
     const [inputValue, setInputValue] = useState('');
+
+    // Force re-render every 500ms to sync with live data
+    const [, forceUpdate] = useState(0);
+    useEffect(() => {
+        const interval = setInterval(() => forceUpdate(n => n + 1), 500);
+        return () => clearInterval(interval);
+    }, []);
+
+    // Inverted logic: isCollapsed = !isWatchlistOpen
+    const isCollapsed = !isWatchlistOpen;
+
+    const isSquadronMode = viewMode === 'SQUADRON';
 
     const handleAdd = (e: React.FormEvent) => {
         e.preventDefault();
@@ -28,7 +40,7 @@ export default function WatchlistPanel() {
         >
             {/* Toggle Button */}
             <button
-                onClick={() => setIsCollapsed(!isCollapsed)}
+                onClick={() => setWatchlistOpen(!isWatchlistOpen)}
                 className={`absolute top-6 -right-12 w-10 h-10 flex items-center justify-center bg-black/60 backdrop-blur-md border border-white/10 rounded-r-xl text-teal-400 hover:text-white transition-all pointer-events-auto ${isCollapsed ? 'translate-x-[0px]' : 'translate-x-0'
                     }`}
             >
@@ -48,13 +60,40 @@ export default function WatchlistPanel() {
 
                 {/* Header */}
                 <div className="p-6 border-b border-white/10">
-                    <h2 className="text-xl font-bold text-white tracking-widest flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-teal-400" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>
-                        SQUADRON
-                    </h2>
-                    <p className="text-xs text-zinc-500 mt-1 font-mono">{favorites.length} ASSETS TRACKED</p>
+                    <div className="flex items-center justify-between">
+                        <h2 className="text-xl font-bold text-white tracking-widest flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-teal-400" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                            SQUADRON
+                        </h2>
+
+                        {/* View Mode Toggle */}
+                        <button
+                            onClick={() => setViewMode(isSquadronMode ? 'GLOBAL' : 'SQUADRON')}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono transition-all ${isSquadronMode
+                                ? 'bg-teal-500/20 text-teal-400 border border-teal-500/50'
+                                : 'bg-white/5 text-zinc-500 border border-white/10 hover:text-white hover:border-white/20'
+                                }`}
+                            title={isSquadronMode ? 'Switch to Global View' : 'Switch to Squadron View'}
+                        >
+                            {/* Radar/Eye Icon */}
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <circle cx="12" cy="12" r="10" />
+                                <circle cx="12" cy="12" r="6" />
+                                <circle cx="12" cy="12" r="2" />
+                                <line x1="12" y1="2" x2="12" y2="4" />
+                                <line x1="12" y1="20" x2="12" y2="22" />
+                                <line x1="2" y1="12" x2="4" y2="12" />
+                                <line x1="20" y1="12" x2="22" y2="12" />
+                            </svg>
+                            {isSquadronMode ? 'ACTIVE' : 'FOCUS'}
+                        </button>
+                    </div>
+                    <p className="text-xs text-zinc-500 mt-2 font-mono">
+                        {favorites.length} ASSETS TRACKED
+                        {isSquadronMode && <span className="text-teal-400 ml-2">• FOCUSED</span>}
+                    </p>
                 </div>
 
                 {/* Add Input */}
@@ -86,13 +125,23 @@ export default function WatchlistPanel() {
                     )}
 
                     {favorites.map(symbol => {
-                        const data = tickers.get(symbol);
+                        // Get LIVE data from streamStore (not stale Zustand data)
+                        const liveData = streamStore.tickers.get(symbol);
+                        const fallbackData = tickers.get(symbol);
+                        const data = liveData || fallbackData;
                         const price = data?.price || 0;
-                        // Use calculated percent if updated by CoinOrb (via click) or just raw 24h
-                        // Actually, for the LIST, we should probably stick to 24h data 
-                        // UNLESS we want to be consistent with the bubbles. 
-                        // Let's use the raw data from store first.
-                        const percent = data?.priceChangePercent || 0;
+
+                        // Calculate percent based on active timeframe
+                        let percent = data?.priceChangePercent || 0;
+
+                        if (timeframe !== '24h' && data) {
+                            const base = baselines.get(symbol);
+                            if (base && base > 0) {
+                                percent = ((data.price - base) / base) * 100;
+                            }
+                            // If no baseline, keep the 24h percent as fallback
+                        }
+
                         const isUp = percent >= 0;
 
                         return (
@@ -132,7 +181,7 @@ export default function WatchlistPanel() {
 
                 {/* Footer */}
                 <div className="p-4 border-t border-white/10 text-[10px] text-zinc-600 text-center font-mono">
-                    STATUS: {timeframe} / <span className="text-teal-500">LIVE</span>
+                    MODE: <span className={isSquadronMode ? 'text-teal-400' : 'text-zinc-500'}>{viewMode}</span> / {timeframe} / <span className="text-teal-500">LIVE</span>
                 </div>
             </div>
         </div>

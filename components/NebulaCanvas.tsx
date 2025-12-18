@@ -13,6 +13,13 @@ export default function NebulaCanvas() {
     const mainContainerRef = useRef<PIXI.Container | null>(null);
     const textureRef = useRef<PIXI.Texture | null>(null);
 
+    // Camera Offset for UI Panel Avoidance
+    const cameraOffsetRef = useRef({ x: 0, y: 0 });
+
+    // Panel Size Constants
+    const RIGHT_PANEL_WIDTH = 400;  // DetailDrawer width
+    const LEFT_PANEL_WIDTH = 288;   // WatchlistPanel width (w-72 = 18rem = 288px)
+
     // Only subscribe to LOW FREQUENCY updates if needed, or just read imperatively
     const { searchQuery, setSelectedTicker, timeframe } = useMarketStore();
     const timeframeRef = useRef(timeframe);
@@ -84,6 +91,40 @@ export default function NebulaCanvas() {
                 const query = state.searchQuery;
                 const activeTimeframe = state.timeframe;
                 const baselines = state.baselines;
+                const viewMode = state.viewMode;
+                const favorites = state.favorites;
+                const isWatchlistOpen = state.isWatchlistOpen;
+                const hasSelectedTicker = state.selectedTicker !== null;
+
+                // Create a Set for faster lookups in SQUADRON mode
+                const favoritesSet = new Set(favorites);
+
+                // ========================================
+                // CAMERA SHIFT: Smooth pan when panels open
+                // ========================================
+                let targetOffsetX = 0;
+                let targetOffsetY = 0;
+
+                // Shift left when right drawer is open
+                if (hasSelectedTicker) {
+                    targetOffsetX = -RIGHT_PANEL_WIDTH / 2;
+                }
+
+                // Shift right when left panel is open
+                if (isWatchlistOpen) {
+                    targetOffsetX += LEFT_PANEL_WIDTH / 2;
+                }
+
+                // Smooth LERP transition
+                const cameraEase = 0.08;
+                cameraOffsetRef.current.x += (targetOffsetX - cameraOffsetRef.current.x) * cameraEase;
+                cameraOffsetRef.current.y += (targetOffsetY - cameraOffsetRef.current.y) * cameraEase;
+
+                // Apply offset to container
+                if (mainContainerRef.current) {
+                    mainContainerRef.current.x = cameraOffsetRef.current.x;
+                    mainContainerRef.current.y = cameraOffsetRef.current.y;
+                }
 
                 // Dynamic Scale Factor based on Timeframe Volatility
                 // 1m/15m have small % changes, so we need higher visual scale to see movement
@@ -92,6 +133,10 @@ export default function NebulaCanvas() {
                 else if (activeTimeframe === '1h') scaleFactor = 50;
                 else if (activeTimeframe === '15m') scaleFactor = 100;
                 else if (activeTimeframe === '1m') scaleFactor = 200;
+
+                // SQUADRON mode: Closer grouping, larger orbs
+                const squadronScaleBoost = viewMode === 'SQUADRON' ? 1.2 : 1.0;
+                const squadronCenterPull = viewMode === 'SQUADRON' ? 0.7 : 1.0; // Pull closer to center
 
                 // Iterate over ALL tickers in the Stream Store
                 streamStore.tickers.forEach((data, symbol) => {
@@ -109,6 +154,19 @@ export default function NebulaCanvas() {
                         orbsRef.current.set(symbol, orb);
                     }
 
+                    // VIEW MODE FILTERING
+                    const isInSquadron = favoritesSet.has(symbol);
+                    const shouldRender = viewMode === 'GLOBAL' || isInSquadron;
+
+                    if (!shouldRender) {
+                        // Hide orb but keep in memory for instant switching
+                        orb.sprite.visible = false;
+                        return; // Skip update and animate
+                    }
+
+                    // Show orb
+                    orb.sprite.visible = true;
+
                     // Calculation Logic: Timeframe Overrides
                     let visualPercent: number | undefined;
 
@@ -125,18 +183,16 @@ export default function NebulaCanvas() {
                     }
 
                     // Update Data (Position Target)
-                    orb.updateData(data, screenCenterY, scaleFactor, visualPercent);
+                    // Apply squadron center pull for tighter grouping
+                    const adjustedScaleFactor = scaleFactor * squadronCenterPull;
+                    orb.updateData(data, screenCenterY, adjustedScaleFactor, visualPercent);
 
                     // Update Highlight (Imperative check)
                     const isMatch = !hasQuery || symbol.includes(query);
                     orb.highlight(isMatch, hasQuery);
 
                     // Update Favorite Status
-                    // Optimization: We could cache the Set outside the loop if performance drops,
-                    // but for <1000 items, generic array includes or Set lookup is fast enough here.
-                    // Accessing raw store state inside loop is okay for this.
-                    const isFav = useMarketStore.getState().favorites.includes(symbol);
-                    orb.setFavorite(isFav);
+                    orb.setFavorite(isInSquadron);
 
                     // Animate Physics
                     orb.animate();
@@ -144,7 +200,8 @@ export default function NebulaCanvas() {
 
                 // Debug Logging (Throttled)
                 if (Date.now() % 2000 < 20) {
-                    console.log(`[Nebula Debug] Timeframe: ${activeTimeframe}, Baselines: ${baselines.size}, Query: ${query}`);
+                    const visibleCount = viewMode === 'SQUADRON' ? favorites.length : streamStore.tickers.size;
+                    console.log(`[Nebula Debug] Mode: ${viewMode}, Visible: ${visibleCount}, Timeframe: ${activeTimeframe}`);
                 }
 
                 // Cleanup stale orbs? (Optional for now)

@@ -35,14 +35,24 @@ export function useTimeframeSync() {
                 return;
             }
 
-            // 3. Veri geldiyse, LIMITSIZ olarak hepsini çek.
-            console.log(`[TimeframeSync] Fetching baselines for ${allSymbols.length} tickers on ${timeframe}...`);
+            // 3. PRIORITY: Get favorites first (always fetch baselines for watchlist items)
+            const favorites = useMarketStore.getState().favorites;
+            const favoritesSet = new Set(favorites);
+
+            // Separate favorites from rest
+            const prioritySymbols = allSymbols.filter(s => favoritesSet.has(s));
+            const otherSymbols = allSymbols.filter(s => !favoritesSet.has(s));
+
+            // Combine with favorites FIRST
+            const orderedSymbols = [...prioritySymbols, ...otherSymbols];
+
+            console.log(`[TimeframeSync] Fetching baselines: ${prioritySymbols.length} favorites + ${otherSymbols.length} others on ${timeframe}...`);
 
             try {
                 // TimeframeManager içindeki batching (parçalı çekim) fonksiyonunu kullan
-                const baselines = await managerRef.current.fetchBaselines(allSymbols, timeframe);
+                const baselines = await managerRef.current.fetchBaselines(orderedSymbols, timeframe);
                 setBaselines(baselines);
-                console.log(`[TimeframeSync] Success! Updated ${baselines.size} baselines.`);
+                console.log(`[TimeframeSync] Success! Updated ${baselines.size} baselines (${prioritySymbols.length} favorites prioritized).`);
             } catch (error) {
                 console.error("[TimeframeSync] Error fetching baselines:", error);
             }
