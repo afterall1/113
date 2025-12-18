@@ -101,6 +101,7 @@ export default function NebulaCanvas() {
                     if (!orb) {
                         const x = Math.random() * screenWidth;
                         orb = new CoinOrb(data, texture, x, screenCenterY);
+                        orb.setParentContainer(mainContainerRef.current!);
                         orb.bindInteraction((clickedData) => {
                             useMarketStore.getState().setSelectedTicker(clickedData);
                         });
