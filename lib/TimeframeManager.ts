@@ -1,7 +1,7 @@
 
 
 export class TimeframeManager {
-    private baseUrl = 'https://api.binance.com/api/v3';
+    private baseUrl = 'https://fapi.binance.com/fapi/v1'; // FUTURES
 
     // Interval to Binance Kline Interval map
     private readonly INTERVAL_MAP: Record<string, string> = {

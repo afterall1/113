@@ -3,7 +3,7 @@ import { useMarketStore } from '@/store/useMarketStore';
 import { BinanceTickerPayload, TickerData } from '@/lib/types';
 import { SoundEngine } from '@/lib/SoundEngine';
 
-const BINANCE_WS_URL = 'wss://stream.binance.com:9443/ws/!ticker@arr';
+const BINANCE_WS_URL = 'wss://fstream.binance.com/ws/!ticker@arr'; // FUTURES
 const MIN_QUOTE_VOLUME = 1_000_000;
 const TARGET_QUOTE_ASSET = 'USDT';
 

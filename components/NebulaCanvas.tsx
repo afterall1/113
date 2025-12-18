@@ -26,10 +26,12 @@ export default function NebulaCanvas() {
     // Create shared texture once
     const createOrbTexture = (app: PIXI.Application) => {
         const graphics = new PIXI.Graphics();
-        graphics.circle(0, 0, 32);
+        // FIX: Draw circles at positive offset (48,48) instead of (0,0)
+        // PixiJS v8's generateTexture() clips content at negative coordinates
+        graphics.circle(48, 48, 32);
         graphics.fill({ color: 0xffffff, alpha: 1 });
         // Add a glow bloom effect
-        graphics.circle(0, 0, 48);
+        graphics.circle(48, 48, 48);
         graphics.fill({ color: 0xffffff, alpha: 0.3 });
         return app.renderer.generateTexture(graphics);
     };
@@ -54,6 +56,8 @@ export default function NebulaCanvas() {
             });
 
             if (containerRef.current) {
+                // Clear any existing canvas (React Strict Mode double-invoke protection)
+                containerRef.current.innerHTML = '';
                 containerRef.current.appendChild(app.canvas);
             }
 
