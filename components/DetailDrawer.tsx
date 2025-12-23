@@ -5,43 +5,13 @@ import { useEffect, useState } from "react";
 import useSWR from 'swr';
 import { fetchTokenMetadata } from '@/lib/services/tokenMetadata';
 import { TokenMetadata } from '@/lib/types';
-
-// Format large numbers (e.g., 1.2B, 500M)
-function formatLargeNumber(num: number): string {
-    if (num >= 1_000_000_000_000) {
-        return `$${(num / 1_000_000_000_000).toFixed(2)}T`;
-    } else if (num >= 1_000_000_000) {
-        return `$${(num / 1_000_000_000).toFixed(2)}B`;
-    } else if (num >= 1_000_000) {
-        return `$${(num / 1_000_000).toFixed(2)}M`;
-    } else if (num >= 1_000) {
-        return `$${(num / 1_000).toFixed(2)}K`;
-    }
-    return `$${num.toFixed(2)}`;
-}
-
-// Format supply numbers without dollar sign
-function formatSupply(num: number): string {
-    if (num >= 1_000_000_000_000) {
-        return `${(num / 1_000_000_000_000).toFixed(2)}T`;
-    } else if (num >= 1_000_000_000) {
-        return `${(num / 1_000_000_000).toFixed(2)}B`;
-    } else if (num >= 1_000_000) {
-        return `${(num / 1_000_000).toFixed(2)}M`;
-    } else if (num >= 1_000) {
-        return `${(num / 1_000).toFixed(2)}K`;
-    }
-    return num.toFixed(2);
-}
-
-// Calculate days until a date
-function getDaysUntil(dateString: string): number {
-    if (!dateString) return 0;
-    const target = new Date(dateString);
-    const today = new Date();
-    const diffTime = target.getTime() - today.getTime();
-    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-}
+import {
+    formatCurrency,
+    formatSupply,
+    formatDate,
+    getDaysUntil,
+    calculateUnlockRisk
+} from '@/lib/utils';
 
 // Skeleton loading component
 function MetricSkeleton() {
@@ -218,11 +188,11 @@ export default function DetailDrawer() {
                             <>
                                 <MetricCard
                                     label="Market Cap"
-                                    value={metadata ? formatLargeNumber(metadata.marketCap) : '—'}
+                                    value={metadata ? formatCurrency(metadata.marketCap) : '—'}
                                 />
                                 <MetricCard
                                     label="FDV"
-                                    value={metadata ? formatLargeNumber(metadata.fdv) : '—'}
+                                    value={metadata ? formatCurrency(metadata.fdv) : '—'}
                                 />
                                 <MetricCard
                                     label="Circulating"
@@ -244,39 +214,47 @@ export default function DetailDrawer() {
                             <div className="h-8 w-32 bg-white/10 rounded" />
                         </div>
                     ) : hasUpcomingUnlock ? (
-                        <div className={`p-4 rounded-xl border mb-6 ${daysUntilUnlock <= 7
-                            ? 'bg-red-500/10 border-red-500/30'
-                            : daysUntilUnlock <= 30
-                                ? 'bg-amber-500/10 border-amber-500/30'
-                                : 'bg-white/5 border-white/10'
-                            }`}>
-                            <div className="flex items-center gap-2 mb-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 ${daysUntilUnlock <= 7 ? 'text-red-400' : daysUntilUnlock <= 30 ? 'text-amber-400' : 'text-zinc-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                </svg>
-                                <p className={`text-xs uppercase tracking-widest ${daysUntilUnlock <= 7 ? 'text-red-400' : daysUntilUnlock <= 30 ? 'text-amber-400' : 'text-zinc-500'}`}>
-                                    Next Token Unlock
-                                </p>
-                            </div>
-                            <div className="flex justify-between items-end">
-                                <div>
-                                    <p className={`text-2xl font-bold font-mono ${daysUntilUnlock <= 7 ? 'text-red-400' : daysUntilUnlock <= 30 ? 'text-amber-400' : 'text-zinc-200'}`}>
-                                        {daysUntilUnlock} gün kaldı
-                                    </p>
-                                    <p className="text-xs text-zinc-500 mt-1">
-                                        {metadata?.nextUnlock?.date}
-                                    </p>
+                        (() => {
+                            const risk = calculateUnlockRisk(metadata?.nextUnlock?.percentOfSupply || 0);
+                            return (
+                                <div className={`p-4 rounded-xl border mb-6 ${risk.bgClass} ${risk.borderClass}`}>
+                                    {/* Header with Risk Badge */}
+                                    <div className="flex items-center justify-between mb-3">
+                                        <div className="flex items-center gap-2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 ${risk.colorClass}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                            </svg>
+                                            <p className={`text-xs uppercase tracking-widest ${risk.colorClass}`}>
+                                                Token Unlock
+                                            </p>
+                                        </div>
+                                        {/* Risk Badge */}
+                                        <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full ${risk.bgClass} ${risk.colorClass} border ${risk.borderClass}`}>
+                                            {risk.labelTR}
+                                        </span>
+                                    </div>
+                                    {/* Content */}
+                                    <div className="flex justify-between items-end">
+                                        <div>
+                                            <p className={`text-2xl font-bold font-mono ${risk.colorClass}`}>
+                                                {daysUntilUnlock} gün kaldı
+                                            </p>
+                                            <p className="text-xs text-zinc-500 mt-1">
+                                                {formatDate(metadata?.nextUnlock?.date || '')}
+                                            </p>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className={`text-lg font-mono ${risk.colorClass}`}>
+                                                {formatCurrency(metadata?.nextUnlock?.valueUSD || 0)}
+                                            </p>
+                                            <p className="text-xs text-zinc-500">
+                                                {metadata?.nextUnlock?.percentOfSupply}% supply
+                                            </p>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className="text-right">
-                                    <p className={`text-lg font-mono ${daysUntilUnlock <= 7 ? 'text-red-400' : daysUntilUnlock <= 30 ? 'text-amber-400' : 'text-zinc-300'}`}>
-                                        {formatLargeNumber(metadata?.nextUnlock?.valueUSD || 0)}
-                                    </p>
-                                    <p className="text-xs text-zinc-500">
-                                        {metadata?.nextUnlock?.percentOfSupply}% supply
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
+                            );
+                        })()
                     ) : (
                         <div className="p-4 rounded-xl bg-white/5 border border-white/5 mb-6">
                             <div className="flex items-center gap-2">
