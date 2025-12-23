@@ -4,6 +4,7 @@ import { useMarketStore } from "@/store/useMarketStore";
 import { useEffect, useState } from "react";
 import useSWR from 'swr';
 import { fetchTokenMetadata } from '@/lib/services/tokenMetadata';
+import { MiniChart } from '@/components/MiniChart';
 import { TokenMetadata, UnlockAllocation } from '@/lib/types';
 import {
     formatCurrency,
@@ -126,6 +127,8 @@ function AllocationLegend({ allocations }: { allocations: UnlockAllocation[] }) 
 export default function DetailDrawer() {
     const { selectedTicker, setSelectedTicker, favorites, toggleFavorite } = useMarketStore();
     const [isVisible, setIsVisible] = useState(false);
+    const [chartInterval, setChartInterval] = useState('15m');
+    const intervals = ['1m', '3m', '15m', '30m', '1h', '2h', '4h', '8h', '12h', '1d', '3d', '1w', '1M'];
 
     // SWR for fetching token metadata
     const { data: metadata, isLoading, error } = useSWR<TokenMetadata>(
@@ -140,6 +143,7 @@ export default function DetailDrawer() {
     useEffect(() => {
         if (selectedTicker) {
             setIsVisible(true);
+            setChartInterval('15m'); // Reset to default on new ticker select
         } else {
             setIsVisible(false);
         }
@@ -346,9 +350,51 @@ export default function DetailDrawer() {
                         </div>
                     )}
 
-                    {/* Mini Chart Placeholder */}
-                    <div className="h-40 rounded-xl bg-gradient-to-b from-white/5 to-transparent border border-white/5 flex items-center justify-center">
-                        <p className="text-zinc-700 text-xs tracking-widest">MINI CHART PREVIEW</p>
+                    {/* --- CHART SECTION (NEW) --- */}
+                    <div className="mb-6 border border-slate-800 bg-slate-900/50 rounded-lg overflow-hidden relative group">
+
+                        {/* Header Row */}
+                        <div className="absolute top-0 left-0 w-full p-3 flex justify-between items-start z-10 pointer-events-none">
+                            {/* Title (Left) */}
+                            <div className="flex items-center gap-2 pointer-events-auto bg-slate-900/80 backdrop-blur rounded px-2 py-1 border border-white/5">
+                                <div className={`w-1.5 h-1.5 rounded-full ${Number(selectedTicker?.priceChangePercent || 0) >= 0 ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]' : 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]'} animate-pulse`} />
+                                <span className="text-[10px] font-mono font-bold text-slate-300 tracking-wider">BINANCE PERP</span>
+                            </div>
+
+                            {/* Premium Interval Ribbon (Right) */}
+                            <div className="pointer-events-auto flex items-center bg-black/40 backdrop-blur-md border border-white/10 rounded-lg p-0.5 overflow-hidden max-w-[220px]">
+                                <div className="flex overflow-x-auto no-scrollbar scroll-smooth gap-0.5 px-0.5"
+                                    style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                                    {intervals.map(int => (
+                                        <button
+                                            key={int}
+                                            onClick={() => setChartInterval(int)}
+                                            className={`
+                                                relative px-2 py-1 text-[9px] font-mono font-bold rounded flex-shrink-0 transition-all duration-300
+                                                ${chartInterval === int
+                                                    ? 'bg-teal-500/10 text-teal-400 shadow-[0_0_10px_rgba(20,184,166,0.1)] border border-teal-500/20'
+                                                    : 'text-zinc-500 hover:text-zinc-200 hover:bg-white/5 border border-transparent'}
+                                            `}
+                                        >
+                                            {int}
+                                            {chartInterval === int && (
+                                                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-0.5 bg-teal-500 rounded-full mb-0.5" />
+                                            )}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                        {/* Fixed height container for chart */}
+                        <div className="h-64 w-full">
+                            {selectedTicker && (
+                                <MiniChart
+                                    symbol={selectedTicker.symbol}
+                                    color={Number(selectedTicker.priceChangePercent) >= 0 ? '#22c55e' : '#ef4444'}
+                                    interval={chartInterval}
+                                />
+                            )}
+                        </div>
                     </div>
 
                     {/* Error State */}
@@ -365,7 +411,7 @@ export default function DetailDrawer() {
                         OPEN TRADE TERMINAL
                     </button>
                 </div>
-            </div>
+            </div >
         </>
     );
 }

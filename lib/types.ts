@@ -1,3 +1,12 @@
+// Chart Data Structure (TradingView Standard)
+export interface CandleData {
+  time: string | number; // Timestamp or YYYY-MM-DD
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+}
+
 export interface TickerData {
   symbol: string;             // e.g., "BTCUSDT"
   price: number;              // Current price
