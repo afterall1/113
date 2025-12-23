@@ -1,4 +1,17 @@
-import { TokenMetadata, TokenUnlock } from '@/lib/types';
+import { TokenMetadata, TokenUnlock, UnlockAllocation } from '@/lib/types';
+
+/**
+ * Allocation categories for token unlocks
+ */
+const ALLOCATION_CATEGORIES = [
+    'Core Team',
+    'Private Investors',
+    'Ecosystem Fund',
+    'Community Rewards',
+    'Treasury',
+    'Advisors',
+    'Foundation',
+];
 
 /**
  * Generate a future date string based on days from now
@@ -7,6 +20,45 @@ function getFutureDate(daysFromNow: number): string {
     const date = new Date();
     date.setDate(date.getDate() + daysFromNow);
     return date.toISOString().split('T')[0];
+}
+
+/**
+ * Generate random allocation breakdown that sums to 100%
+ * @param seed - Seed for deterministic random generation
+ * @returns Array of allocations
+ */
+function generateAllocations(seed: number): UnlockAllocation[] {
+    // Shuffle categories based on seed
+    const shuffled = [...ALLOCATION_CATEGORIES].sort((a, b) => {
+        const hashA = a.charCodeAt(0) + seed;
+        const hashB = b.charCodeAt(0) + seed;
+        return hashA - hashB;
+    });
+
+    // Pick 2-4 categories
+    const categoryCount = 2 + (seed % 3);
+    const selected = shuffled.slice(0, categoryCount);
+
+    // Distribute percentages (sum to 100)
+    const allocations: UnlockAllocation[] = [];
+    let remaining = 100;
+
+    for (let i = 0; i < selected.length; i++) {
+        const isLast = i === selected.length - 1;
+        // Last one gets the remainder, others get random portions
+        const percent = isLast
+            ? remaining
+            : Math.floor(remaining * (0.3 + (((seed + i) % 40) / 100)));
+
+        remaining -= percent;
+        allocations.push({
+            category: selected[i],
+            percent,
+        });
+    }
+
+    // Sort by percent descending for UI display
+    return allocations.sort((a, b) => b.percent - a.percent);
 }
 
 /**
@@ -185,6 +237,7 @@ function generateGenericMetadata(symbol: string): TokenMetadata {
         amount: marketCap * 0.02 / 10, // Rough token amount estimate
         valueUSD: marketCap * 0.02,
         percentOfSupply: 2 + (randomSeed % 5),
+        allocations: generateAllocations(randomSeed),
     };
 
     return {
@@ -220,16 +273,21 @@ export async function fetchTokenMetadata(symbol: string): Promise<TokenMetadata>
         const { unlockDays, unlockPercent, ...metadata } = mockData;
 
         // Calculate next unlock based on mock data
+        // Generate deterministic seed from symbol
+        const symbolSeed = baseSymbol.charCodeAt(0) + (baseSymbol.charCodeAt(1) || 0);
+
         const nextUnlock: TokenUnlock = unlockDays > 0 ? {
             date: getFutureDate(unlockDays),
             amount: metadata.circulatingSupply * (unlockPercent / 100),
             valueUSD: metadata.marketCap * (unlockPercent / 100),
             percentOfSupply: unlockPercent,
+            allocations: generateAllocations(symbolSeed),
         } : {
             date: '',
             amount: 0,
             valueUSD: 0,
             percentOfSupply: 0,
+            allocations: [],
         };
 
         return {

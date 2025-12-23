@@ -4,7 +4,7 @@ import { useMarketStore } from "@/store/useMarketStore";
 import { useEffect, useState } from "react";
 import useSWR from 'swr';
 import { fetchTokenMetadata } from '@/lib/services/tokenMetadata';
-import { TokenMetadata } from '@/lib/types';
+import { TokenMetadata, UnlockAllocation } from '@/lib/types';
 import {
     formatCurrency,
     formatSupply,
@@ -12,6 +12,35 @@ import {
     getDaysUntil,
     calculateUnlockRisk
 } from '@/lib/utils';
+
+// Category color mapping for allocation visualization
+const CATEGORY_COLORS: Record<string, { bg: string; glow: string }> = {
+    'Core Team': { bg: 'bg-orange-500', glow: 'shadow-orange-500/50' },
+    'Private Investors': { bg: 'bg-purple-500', glow: 'shadow-purple-500/50' },
+    'Ecosystem Fund': { bg: 'bg-teal-500', glow: 'shadow-teal-500/50' },
+    'Community Rewards': { bg: 'bg-green-500', glow: 'shadow-green-500/50' },
+    'Treasury': { bg: 'bg-blue-500', glow: 'shadow-blue-500/50' },
+    'Advisors': { bg: 'bg-pink-500', glow: 'shadow-pink-500/50' },
+    'Foundation': { bg: 'bg-cyan-500', glow: 'shadow-cyan-500/50' },
+};
+
+const CATEGORY_DOT_COLORS: Record<string, string> = {
+    'Core Team': 'bg-orange-500',
+    'Private Investors': 'bg-purple-500',
+    'Ecosystem Fund': 'bg-teal-500',
+    'Community Rewards': 'bg-green-500',
+    'Treasury': 'bg-blue-500',
+    'Advisors': 'bg-pink-500',
+    'Foundation': 'bg-cyan-500',
+};
+
+function getCategoryColor(category: string): { bg: string; glow: string } {
+    return CATEGORY_COLORS[category] || { bg: 'bg-zinc-500', glow: 'shadow-zinc-500/50' };
+}
+
+function getCategoryDotColor(category: string): string {
+    return CATEGORY_DOT_COLORS[category] || 'bg-zinc-500';
+}
 
 // Skeleton loading component
 function MetricSkeleton() {
@@ -49,6 +78,48 @@ function ChainBadge({ chain }: { chain: string }) {
         <span className="px-2 py-1 text-[10px] rounded-md bg-purple-500/10 text-purple-400 border border-purple-500/20">
             {chain}
         </span>
+    );
+}
+
+// Stacked allocation bar component
+function AllocationBar({ allocations }: { allocations: UnlockAllocation[] }) {
+    if (!allocations || allocations.length === 0) return null;
+
+    return (
+        <div className="mt-4">
+            {/* Stacked Bar */}
+            <div className="h-3 rounded-full overflow-hidden flex bg-white/5 shadow-[0_0_10px_rgba(255,255,255,0.05)]">
+                {allocations.map((alloc, idx) => {
+                    const colors = getCategoryColor(alloc.category);
+                    return (
+                        <div
+                            key={alloc.category}
+                            className={`${colors.bg} transition-all duration-500 hover:brightness-125`}
+                            style={{ width: `${alloc.percent}%` }}
+                            title={`${alloc.category}: ${alloc.percent}%`}
+                        />
+                    );
+                })}
+            </div>
+        </div>
+    );
+}
+
+// Allocation legend component
+function AllocationLegend({ allocations }: { allocations: UnlockAllocation[] }) {
+    if (!allocations || allocations.length === 0) return null;
+
+    return (
+        <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1">
+            {allocations.map((alloc) => (
+                <div key={alloc.category} className="flex items-center gap-1.5">
+                    <span className={`w-2 h-2 rounded-full ${getCategoryDotColor(alloc.category)}`} />
+                    <span className="text-[10px] text-zinc-400">
+                        {alloc.category}: <span className="text-zinc-200 font-mono">{alloc.percent}%</span>
+                    </span>
+                </div>
+            ))}
+        </div>
     );
 }
 
@@ -252,6 +323,14 @@ export default function DetailDrawer() {
                                             </p>
                                         </div>
                                     </div>
+
+                                    {/* Allocation Breakdown Bar */}
+                                    {metadata?.nextUnlock?.allocations && metadata.nextUnlock.allocations.length > 0 && (
+                                        <>
+                                            <AllocationBar allocations={metadata.nextUnlock.allocations} />
+                                            <AllocationLegend allocations={metadata.nextUnlock.allocations} />
+                                        </>
+                                    )}
                                 </div>
                             );
                         })()

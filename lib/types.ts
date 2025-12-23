@@ -6,12 +6,19 @@ export interface TickerData {
   timeFrame: string;          // e.g., "1m", "15m", "1h"
 }
 
+// Unlock Allocation Breakdown (who receives tokens)
+export interface UnlockAllocation {
+  category: string;  // e.g., 'Core Team', 'Private Investors', 'Ecosystem Fund'
+  percent: number;   // Percentage of this unlock going to this category
+}
+
 // Token Unlock Schedule
 export interface TokenUnlock {
-  date: string;           // ISO date string (e.g., "2025-03-15")
-  amount: number;         // Number of tokens to be unlocked
-  valueUSD: number;       // Estimated USD value at unlock
-  percentOfSupply: number; // Percentage of total supply being unlocked
+  date: string;              // ISO date string (e.g., "2025-03-15")
+  amount: number;            // Number of tokens to be unlocked
+  valueUSD: number;          // Estimated USD value at unlock
+  percentOfSupply: number;   // Percentage of total supply being unlocked
+  allocations: UnlockAllocation[]; // Breakdown of who receives tokens
 }
 
 // Fundamental Token Metadata
