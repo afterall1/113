@@ -50,3 +50,26 @@ export interface BinanceTickerPayload {
   P: string;  // Price change percent
   E: number;  // Event time
 }
+
+// --- TRADE TERMINAL TYPES ---
+
+export type TradeSide = 'LONG' | 'SHORT';
+
+export interface Position {
+  id: string;             // Unique ID (e.g., uuid)
+  symbol: string;         // e.g., "BTCUSDT"
+  side: TradeSide;        // LONG or SHORT
+  entryPrice: number;     // Price at entry
+  sizeUSD: number;        // Total position size in USD (Margin * Leverage)
+  leverage: number;       // Leverage multiplier (e.g., 20)
+  marginUSD: number;      // Collateral used
+  liquidationPrice: number; // Estimated liq price
+  timestamp: number;      // Entry time
+}
+
+export interface TradeOrder {
+  symbol: string;
+  side: TradeSide;
+  leverage: number;
+  margin: number;
+}

@@ -56,10 +56,11 @@ function MetricSkeleton() {
 // Metric card component
 function MetricCard({ label, value, subValue }: { label: string; value: string; subValue?: string }) {
     return (
-        <div className="group p-3 rounded-xl bg-white/5 border border-white/5 hover:border-white/10 transition-all hover:bg-white/[0.07]">
-            <p className="text-[10px] text-zinc-500 uppercase tracking-widest mb-1">{label}</p>
-            <p className="text-lg font-mono text-zinc-200">{value}</p>
-            {subValue && <p className="text-xs text-zinc-500 mt-0.5">{subValue}</p>}
+        <div className="group p-3 rounded-xl bg-white/5 border border-white/5 hover:border-white/20 transition-all hover:bg-white/[0.08] relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <p className="text-[10px] text-zinc-500 uppercase tracking-widest mb-1 relative z-10">{label}</p>
+            <p className="text-lg font-mono text-zinc-200 relative z-10">{value}</p>
+            {subValue && <p className="text-xs text-zinc-500 mt-0.5 relative z-10">{subValue}</p>}
         </div>
     );
 }
@@ -67,7 +68,7 @@ function MetricCard({ label, value, subValue }: { label: string; value: string; 
 // Tag pill component
 function TagPill({ tag }: { tag: string }) {
     return (
-        <span className="px-2 py-1 text-[10px] rounded-full bg-teal-500/10 text-teal-400 border border-teal-500/20 uppercase tracking-wider">
+        <span className="px-2 py-1 text-[10px] rounded-full bg-teal-500/10 text-teal-400 border border-teal-500/20 uppercase tracking-wider shadow-[0_0_10px_rgba(20,184,166,0.1)]">
             {tag}
         </span>
     );
@@ -76,7 +77,7 @@ function TagPill({ tag }: { tag: string }) {
 // Chain badge component
 function ChainBadge({ chain }: { chain: string }) {
     return (
-        <span className="px-2 py-1 text-[10px] rounded-md bg-purple-500/10 text-purple-400 border border-purple-500/20">
+        <span className="px-2 py-1 text-[10px] rounded-md bg-purple-500/10 text-purple-400 border border-purple-500/20 shadow-[0_0_10px_rgba(168,85,247,0.1)]">
             {chain}
         </span>
     );
@@ -114,7 +115,7 @@ function AllocationLegend({ allocations }: { allocations: UnlockAllocation[] }) 
         <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1">
             {allocations.map((alloc) => (
                 <div key={alloc.category} className="flex items-center gap-1.5">
-                    <span className={`w-2 h-2 rounded-full ${getCategoryDotColor(alloc.category)}`} />
+                    <span className={`w-2 h-2 rounded-full ${getCategoryDotColor(alloc.category)} shadow-[0_0_5px_currentColor]`} />
                     <span className="text-[10px] text-zinc-400">
                         {alloc.category}: <span className="text-zinc-200 font-mono">{alloc.percent}%</span>
                     </span>
@@ -124,9 +125,14 @@ function AllocationLegend({ allocations }: { allocations: UnlockAllocation[] }) 
     );
 }
 
+import TradeTerminal from './TradeTerminal';
+
+// ... imports
+
 export default function DetailDrawer() {
     const { selectedTicker, setSelectedTicker, favorites, toggleFavorite } = useMarketStore();
     const [isVisible, setIsVisible] = useState(false);
+    const [isTerminalOpen, setIsTerminalOpen] = useState(false);
     const [chartInterval, setChartInterval] = useState('15m');
     const intervals = ['1m', '3m', '15m', '30m', '1h', '2h', '4h', '8h', '12h', '1d', '3d', '1w', '1M'];
 
@@ -142,8 +148,9 @@ export default function DetailDrawer() {
 
     useEffect(() => {
         if (selectedTicker) {
-            setIsVisible(true);
-            setChartInterval('15m'); // Reset to default on new ticker select
+            // Small delay to allow mounting before triggering animation
+            requestAnimationFrame(() => setIsVisible(true));
+            setChartInterval('15m');
         } else {
             setIsVisible(false);
         }
@@ -151,7 +158,7 @@ export default function DetailDrawer() {
 
     const close = () => {
         setIsVisible(false);
-        setTimeout(() => setSelectedTicker(null), 300); // Wait for transition
+        setTimeout(() => setSelectedTicker(null), 300); // Wait for exit animation
     };
 
     if (!selectedTicker && !isVisible) return null;
@@ -161,36 +168,60 @@ export default function DetailDrawer() {
     const circulationRatio = metadata ? (metadata.circulatingSupply / (metadata.maxSupply || metadata.circulatingSupply) * 100) : 0;
 
     return (
-        <>
+        <div className={`fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 transition-all duration-300 ${isVisible ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
+
             {/* Backdrop */}
             <div
+                className="absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity duration-300"
                 onClick={close}
-                className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-30 transition-opacity duration-300 ${isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
-                    }`}
             />
 
-            {/* Drawer Panel */}
+            {/* Aerogel Holographic Window */}
             <div
-                className={`fixed top-0 right-0 h-full w-full sm:w-[420px] bg-[#0a0a0a]/95 backdrop-blur-xl border-l border-white/10 z-40 transform transition-transform duration-300 ease-out shadow-2xl overflow-y-auto ${isVisible ? 'translate-x-0' : 'translate-x-full'
-                    }`}
+                className={`
+                    relative w-full max-w-3xl 
+                    bg-gradient-to-b from-zinc-900/95 to-zinc-950/95 
+                    backdrop-blur-xl border border-white/10 border-t-white/20
+                    shadow-[0_0_50px_rgba(0,0,0,0.5)] 
+                    flex flex-col overflow-hidden
+                    transition-all duration-300 ease-out
+                    absolute bottom-0 h-[80vh] rounded-t-2xl sm:static sm:h-auto sm:max-h-[85vh] sm:rounded-2xl
+                    ${isVisible ? 'translate-y-0 scale-100 opacity-100' : 'translate-y-8 scale-95 opacity-0'}
+                `}
             >
-                <div className="p-6 pb-32">
+                {/* Top Glow Effect */}
+                <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+
+                {/* Scanline Texture (Subtle) */}
+                <div className="absolute inset-0 pointer-events-none bg-[url('/scanline.png')] opacity-[0.03] bg-repeat"
+                    style={{ backgroundSize: '100% 4px' }} />
+
+                {/* Scrollable Content */}
+                <div className="flex-1 overflow-y-auto p-6 sm:p-8 custom-scrollbar relative z-10">
+
                     {/* Header */}
                     <div className="flex justify-between items-start mb-8">
                         <div>
-                            <h2 className="text-4xl font-bold text-white tracking-tighter mb-1">
+                            <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tighter mb-1 drop-shadow-lg">
                                 {selectedTicker?.symbol?.replace('USDT', '')}
                                 <span className="text-sm text-zinc-500 ml-2 font-mono">/USDT</span>
                             </h2>
-                            <div className={`text-lg font-mono flex items-center gap-2 ${(selectedTicker?.priceChangePercent || 0) >= 0 ? 'text-teal-400' : 'text-red-500'
-                                }`}>
-                                <span className="text-3xl font-bold tracking-tight">
+                            <div className={`text-lg font-mono flex items-center gap-3 ${(selectedTicker?.priceChangePercent || 0) >= 0 ? 'text-teal-400' : 'text-red-500'}`}>
+                                <span className="text-2xl sm:text-3xl font-bold tracking-tight">
                                     ${selectedTicker?.price?.toFixed(selectedTicker.price < 1 ? 4 : 2)}
                                 </span>
-                                <span className="px-2 py-0.5 rounded-full bg-white/5 text-sm">
+                                <span className="px-2 py-0.5 rounded-full bg-white/5 text-sm border border-white/5">
                                     {(selectedTicker?.priceChangePercent || 0) > 0 ? '+' : ''}
                                     {selectedTicker?.priceChangePercent}%
                                 </span>
+                                {/* Live Indicator */}
+                                <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-green-500/10 border border-green-500/20">
+                                    <span className="relative flex h-2 w-2">
+                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                                    </span>
+                                    <span className="text-[9px] font-bold text-green-400 tracking-wider">LIVE</span>
+                                </div>
                             </div>
                         </div>
 
@@ -198,9 +229,9 @@ export default function DetailDrawer() {
                             {/* Favorite Button */}
                             <button
                                 onClick={() => selectedTicker && toggleFavorite(selectedTicker.symbol)}
-                                className={`p-2 rounded-full transition-all ${favorites.includes(selectedTicker?.symbol || '')
-                                    ? 'text-yellow-400 bg-yellow-400/10 hover:bg-yellow-400/20'
-                                    : 'text-zinc-600 hover:text-white hover:bg-white/10'
+                                className={`p-2 rounded-full transition-all border border-transparent ${favorites.includes(selectedTicker?.symbol || '')
+                                    ? 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20 hover:bg-yellow-400/20 shadow-[0_0_10px_rgba(250,204,21,0.2)]'
+                                    : 'text-zinc-600 hover:text-white hover:bg-white/10 hover:border-white/10'
                                     }`}
                                 title="Toggle Favorite"
                             >
@@ -209,9 +240,10 @@ export default function DetailDrawer() {
                                 </svg>
                             </button>
 
+                            {/* Close Button */}
                             <button
                                 onClick={close}
-                                className="p-2 rounded-full hover:bg-white/10 text-white/50 hover:text-white transition-colors"
+                                className="p-2 rounded-full hover:bg-white/10 text-white/50 hover:text-white transition-colors border border-transparent hover:border-white/10"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -227,20 +259,19 @@ export default function DetailDrawer() {
                             <div className="h-4 w-3/4 bg-white/10 rounded" />
                         </div>
                     ) : metadata?.description && (
-                        <p className="text-sm text-zinc-400 mb-6 leading-relaxed">
+                        <p className="text-sm text-zinc-400 mb-8 leading-relaxed max-w-2xl">
                             {metadata.description}
                         </p>
                     )}
 
                     {/* Tags & Chains */}
                     {isLoading ? (
-                        <div className="flex gap-2 mb-6 animate-pulse">
+                        <div className="flex gap-2 mb-8 animate-pulse">
                             <div className="h-6 w-16 bg-white/10 rounded-full" />
                             <div className="h-6 w-20 bg-white/10 rounded-full" />
-                            <div className="h-6 w-14 bg-white/10 rounded-full" />
                         </div>
                     ) : (
-                        <div className="flex flex-wrap gap-2 mb-6">
+                        <div className="flex flex-wrap gap-2 mb-8">
                             {metadata?.tags?.map((tag) => (
                                 <TagPill key={tag} tag={tag} />
                             ))}
@@ -250,168 +281,183 @@ export default function DetailDrawer() {
                         </div>
                     )}
 
-                    {/* Metrics Grid */}
-                    <div className="grid grid-cols-2 gap-3 mb-6">
-                        {isLoading ? (
-                            <>
-                                <div className="p-3 rounded-xl bg-white/5 border border-white/5"><MetricSkeleton /></div>
-                                <div className="p-3 rounded-xl bg-white/5 border border-white/5"><MetricSkeleton /></div>
-                                <div className="p-3 rounded-xl bg-white/5 border border-white/5"><MetricSkeleton /></div>
-                                <div className="p-3 rounded-xl bg-white/5 border border-white/5"><MetricSkeleton /></div>
-                            </>
-                        ) : (
-                            <>
-                                <MetricCard
-                                    label="Market Cap"
-                                    value={metadata ? formatCurrency(metadata.marketCap) : '—'}
-                                />
-                                <MetricCard
-                                    label="FDV"
-                                    value={metadata ? formatCurrency(metadata.fdv) : '—'}
-                                />
-                                <MetricCard
-                                    label="Circulating"
-                                    value={metadata ? formatSupply(metadata.circulatingSupply) : '—'}
-                                    subValue={metadata?.maxSupply ? `${circulationRatio.toFixed(1)}% of max` : 'Infinite'}
-                                />
-                                <MetricCard
-                                    label="24h Volume"
-                                    value={`$${parseInt(selectedTicker?.volume?.toString() || '0').toLocaleString()}`}
-                                />
-                            </>
-                        )}
+                    {/* Main Content Stack */}
+                    <div className="flex flex-col gap-6 mb-8">
+
+                        {/* 1. Chart Section (Full Width Prominent) */}
+                        <div className="rounded-xl border border-white/5 bg-black/40 overflow-hidden relative group h-[320px] shadow-inner shadow-black/50">
+                            {/* Header Row */}
+                            <div className="absolute top-0 left-0 w-full p-3 flex justify-between items-start z-10 pointer-events-none">
+                                {/* Title (Left) */}
+                                <div className="flex items-center gap-2 pointer-events-auto bg-zinc-900/90 backdrop-blur rounded px-2 py-1 border border-white/10 shadow-lg">
+                                    <div className={`w-1.5 h-1.5 rounded-full ${Number(selectedTicker?.priceChangePercent || 0) >= 0 ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]' : 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]'} animate-pulse`} />
+                                    <span className="text-[10px] font-mono font-bold text-slate-300 tracking-wider">BINANCE PERP</span>
+                                </div>
+
+                                {/* Premium Interval Ribbon (Right) */}
+                                <div className="pointer-events-auto flex items-center bg-zinc-900/90 backdrop-blur-md border border-white/10 rounded-lg p-0.5 overflow-hidden max-w-[220px] shadow-lg">
+                                    <div className="flex overflow-x-auto no-scrollbar scroll-smooth gap-0.5 px-0.5"
+                                        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                                        {intervals.map(int => (
+                                            <button
+                                                key={int}
+                                                onClick={() => setChartInterval(int)}
+                                                className={`
+                                                    relative px-2 py-1 text-[9px] font-mono font-bold rounded flex-shrink-0 transition-all duration-300
+                                                    ${chartInterval === int
+                                                        ? 'bg-teal-500/10 text-teal-400 shadow-[0_0_10px_rgba(20,184,166,0.1)] border border-teal-500/20'
+                                                        : 'text-zinc-500 hover:text-zinc-200 hover:bg-white/5 border border-transparent'}
+                                                `}
+                                            >
+                                                {int}
+                                                {chartInterval === int && (
+                                                    <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-0.5 bg-teal-500 rounded-full mb-0.5" />
+                                                )}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Chart Component */}
+                            <div className="w-full h-full">
+                                {selectedTicker && (
+                                    <MiniChart
+                                        symbol={selectedTicker.symbol}
+                                        color={Number(selectedTicker.priceChangePercent) >= 0 ? '#22c55e' : '#ef4444'}
+                                        interval={chartInterval}
+                                    />
+                                )}
+                            </div>
+                        </div>
+
+                        {/* 2. Key Metrics (4-Column Grid) */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            {isLoading ? (
+                                <>
+                                    <div className="p-3 rounded-xl bg-white/5 border border-white/5"><MetricSkeleton /></div>
+                                    <div className="p-3 rounded-xl bg-white/5 border border-white/5"><MetricSkeleton /></div>
+                                    <div className="p-3 rounded-xl bg-white/5 border border-white/5"><MetricSkeleton /></div>
+                                    <div className="p-3 rounded-xl bg-white/5 border border-white/5"><MetricSkeleton /></div>
+                                </>
+                            ) : (
+                                <>
+                                    <MetricCard
+                                        label="Market Cap"
+                                        value={metadata ? formatCurrency(metadata.marketCap) : '—'}
+                                    />
+                                    <MetricCard
+                                        label="FDV"
+                                        value={metadata ? formatCurrency(metadata.fdv) : '—'}
+                                    />
+                                    <MetricCard
+                                        label="Circulating"
+                                        value={metadata ? formatSupply(metadata.circulatingSupply) : '—'}
+                                        subValue={metadata?.maxSupply ? `${circulationRatio.toFixed(1)}% of max` : 'Infinite'}
+                                    />
+                                    <MetricCard
+                                        label="24h Volume"
+                                        value={`$${parseInt(selectedTicker?.volume?.toString() || '0').toLocaleString()}`}
+                                    />
+                                </>
+                            )}
+                        </div>
                     </div>
 
-                    {/* Next Unlock Card */}
+                    {/* Token Unlock Section */}
                     {isLoading ? (
                         <div className="p-4 rounded-xl bg-white/5 border border-white/5 animate-pulse mb-6">
                             <div className="h-4 w-24 bg-white/10 rounded mb-3" />
                             <div className="h-8 w-32 bg-white/10 rounded" />
                         </div>
-                    ) : hasUpcomingUnlock ? (
-                        (() => {
+                    ) : (hasUpcomingUnlock || metadata?.nextUnlock) ? (
+                        hasUpcomingUnlock ? (() => {
                             const risk = calculateUnlockRisk(metadata?.nextUnlock?.percentOfSupply || 0);
                             return (
-                                <div className={`p-4 rounded-xl border mb-6 ${risk.bgClass} ${risk.borderClass}`}>
-                                    {/* Header with Risk Badge */}
-                                    <div className="flex items-center justify-between mb-3">
-                                        <div className="flex items-center gap-2">
-                                            <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 ${risk.colorClass}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                            </svg>
-                                            <p className={`text-xs uppercase tracking-widest ${risk.colorClass}`}>
-                                                Token Unlock
-                                            </p>
-                                        </div>
-                                        {/* Risk Badge */}
-                                        <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full ${risk.bgClass} ${risk.colorClass} border ${risk.borderClass}`}>
-                                            {risk.labelTR}
-                                        </span>
-                                    </div>
-                                    {/* Content */}
-                                    <div className="flex justify-between items-end">
-                                        <div>
-                                            <p className={`text-2xl font-bold font-mono ${risk.colorClass}`}>
-                                                {daysUntilUnlock} gün kaldı
-                                            </p>
-                                            <p className="text-xs text-zinc-500 mt-1">
-                                                {formatDate(metadata?.nextUnlock?.date || '')}
-                                            </p>
-                                        </div>
-                                        <div className="text-right">
-                                            <p className={`text-lg font-mono ${risk.colorClass}`}>
-                                                {formatCurrency(metadata?.nextUnlock?.valueUSD || 0)}
-                                            </p>
-                                            <p className="text-xs text-zinc-500">
-                                                {metadata?.nextUnlock?.percentOfSupply}% supply
-                                            </p>
-                                        </div>
-                                    </div>
+                                <div className={`p-5 rounded-xl border mb-6 ${risk.bgClass} ${risk.borderClass} relative overflow-hidden`}>
+                                    {/* Background Glow */}
+                                    <div className={`absolute inset-0 opacity-10 ${risk.colorClass.replace('text-', 'bg-')}`} />
 
-                                    {/* Allocation Breakdown Bar */}
-                                    {metadata?.nextUnlock?.allocations && metadata.nextUnlock.allocations.length > 0 && (
-                                        <>
-                                            <AllocationBar allocations={metadata.nextUnlock.allocations} />
-                                            <AllocationLegend allocations={metadata.nextUnlock.allocations} />
-                                        </>
-                                    )}
+                                    <div className="relative z-10">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <div className="flex items-center gap-2">
+                                                <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 ${risk.colorClass}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                                </svg>
+                                                <p className={`text-xs uppercase tracking-widest ${risk.colorClass}`}>
+                                                    Token Unlock Event
+                                                </p>
+                                            </div>
+                                            <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full ${risk.bgClass} ${risk.colorClass} border ${risk.borderClass} shadow-[0_0_10px_currentColor]`}>
+                                                {risk.labelTR}
+                                            </span>
+                                        </div>
+                                        <div className="flex flex-col sm:flex-row justify-between items-end gap-4 mb-4">
+                                            <div>
+                                                <p className={`text-2xl font-bold font-mono ${risk.colorClass} drop-shadow-md`}>
+                                                    {daysUntilUnlock} gün kaldı
+                                                </p>
+                                                <p className="text-xs text-zinc-500 mt-1">
+                                                    Scheduled for {formatDate(metadata?.nextUnlock?.date || '')}
+                                                </p>
+                                            </div>
+                                            <div className="text-right">
+                                                <p className={`text-lg font-mono ${risk.colorClass}`}>
+                                                    {formatCurrency(metadata?.nextUnlock?.valueUSD || 0)}
+                                                </p>
+                                                <p className="text-xs text-zinc-500">
+                                                    Represents {metadata?.nextUnlock?.percentOfSupply}% of supply
+                                                </p>
+                                            </div>
+                                        </div>
+                                        {metadata?.nextUnlock?.allocations && metadata.nextUnlock.allocations.length > 0 && (
+                                            <>
+                                                <AllocationBar allocations={metadata.nextUnlock.allocations} />
+                                                <AllocationLegend allocations={metadata.nextUnlock.allocations} />
+                                            </>
+                                        )}
+                                    </div>
                                 </div>
                             );
-                        })()
-                    ) : (
-                        <div className="p-4 rounded-xl bg-white/5 border border-white/5 mb-6">
-                            <div className="flex items-center gap-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        })() : (
+                            // No upcoming unlock but we have metadata
+                            <div className="p-4 rounded-xl bg-white/5 border border-white/5 mb-6 flex items-center gap-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
-                                <p className="text-xs text-zinc-500 uppercase tracking-widest">Token Unlock</p>
-                            </div>
-                            <p className="text-sm text-zinc-400 mt-2">Yaklaşan token unlock yok</p>
-                        </div>
-                    )}
-
-                    {/* --- CHART SECTION (NEW) --- */}
-                    <div className="mb-6 border border-slate-800 bg-slate-900/50 rounded-lg overflow-hidden relative group">
-
-                        {/* Header Row */}
-                        <div className="absolute top-0 left-0 w-full p-3 flex justify-between items-start z-10 pointer-events-none">
-                            {/* Title (Left) */}
-                            <div className="flex items-center gap-2 pointer-events-auto bg-slate-900/80 backdrop-blur rounded px-2 py-1 border border-white/5">
-                                <div className={`w-1.5 h-1.5 rounded-full ${Number(selectedTicker?.priceChangePercent || 0) >= 0 ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]' : 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]'} animate-pulse`} />
-                                <span className="text-[10px] font-mono font-bold text-slate-300 tracking-wider">BINANCE PERP</span>
-                            </div>
-
-                            {/* Premium Interval Ribbon (Right) */}
-                            <div className="pointer-events-auto flex items-center bg-black/40 backdrop-blur-md border border-white/10 rounded-lg p-0.5 overflow-hidden max-w-[220px]">
-                                <div className="flex overflow-x-auto no-scrollbar scroll-smooth gap-0.5 px-0.5"
-                                    style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-                                    {intervals.map(int => (
-                                        <button
-                                            key={int}
-                                            onClick={() => setChartInterval(int)}
-                                            className={`
-                                                relative px-2 py-1 text-[9px] font-mono font-bold rounded flex-shrink-0 transition-all duration-300
-                                                ${chartInterval === int
-                                                    ? 'bg-teal-500/10 text-teal-400 shadow-[0_0_10px_rgba(20,184,166,0.1)] border border-teal-500/20'
-                                                    : 'text-zinc-500 hover:text-zinc-200 hover:bg-white/5 border border-transparent'}
-                                            `}
-                                        >
-                                            {int}
-                                            {chartInterval === int && (
-                                                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-0.5 bg-teal-500 rounded-full mb-0.5" />
-                                            )}
-                                        </button>
-                                    ))}
+                                <div>
+                                    <p className="text-xs text-zinc-500 uppercase tracking-widest">Token Unlock</p>
+                                    <p className="text-sm text-zinc-300">No major unlocks scheduled in the near future.</p>
                                 </div>
                             </div>
-                        </div>
-                        {/* Fixed height container for chart */}
-                        <div className="h-64 w-full">
-                            {selectedTicker && (
-                                <MiniChart
-                                    symbol={selectedTicker.symbol}
-                                    color={Number(selectedTicker.priceChangePercent) >= 0 ? '#22c55e' : '#ef4444'}
-                                    interval={chartInterval}
-                                />
-                            )}
-                        </div>
-                    </div>
+                        )
+                    ) : null}
 
                     {/* Error State */}
                     {error && (
                         <div className="mt-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20">
-                            <p className="text-xs text-red-400">Metadata yüklenirken hata oluştu</p>
+                            <p className="text-xs text-red-400">Metadata could not be loaded.</p>
                         </div>
                     )}
                 </div>
 
-                {/* Fixed Bottom Button */}
-                <div className="fixed bottom-0 right-0 w-full sm:w-[420px] p-6 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/90 to-transparent">
-                    <button className="w-full py-4 bg-teal-500 hover:bg-teal-400 text-black font-bold tracking-widest rounded-xl transition-all shadow-[0_0_20px_rgba(20,184,166,0.3)] hover:shadow-[0_0_30px_rgba(20,184,166,0.5)]">
-                        OPEN TRADE TERMINAL
+                {/* Footer (Fixed at bottom of window) */}
+                <div className="p-6 border-t border-white/5 bg-white/[0.02] flex justify-end relative z-10">
+                    <button
+                        onClick={() => setIsTerminalOpen(true)}
+                        className="w-full sm:w-auto px-8 py-3 bg-teal-500 hover:bg-teal-400 text-black font-bold tracking-widest rounded-lg transition-all shadow-[0_0_20px_rgba(20,184,166,0.3)] hover:shadow-[0_0_35px_rgba(20,184,166,0.6)] group"
+                    >
+                        <span className="group-hover:tracking-[0.2em] transition-all duration-300">OPEN TERMINAL</span>
                     </button>
                 </div>
-            </div >
-        </>
+
+                {/* TRADE TERMINAL OVERLAY */}
+                {isTerminalOpen && (
+                    <div className="absolute inset-0 z-50 bg-black/80 backdrop-blur-md p-4 animate-in fade-in zoom-in-95 duration-300">
+                        <TradeTerminal onClose={() => setIsTerminalOpen(false)} />
+                    </div>
+                )}
+            </div>
+        </div>
     );
 }
