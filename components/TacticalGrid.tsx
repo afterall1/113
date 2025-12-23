@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useMarketStore, GridSlot } from '@/store/useMarketStore';
 import { MiniChart } from './MiniChart';
-import { streamStore } from '@/hooks/useBinanceStream';
+import { CoinSelector } from './CoinSelector';
 
 /**
  * Tactical Grid Component
@@ -12,28 +12,21 @@ import { streamStore } from '@/hooks/useBinanceStream';
  */
 export function TacticalGrid() {
     const { gridSlots, setGridSlot, clearGridSlot, activeSlotId, setActiveSlotId, toggleViewMode } = useMarketStore();
-    const [isSelectingForSlot, setIsSelectingForSlot] = useState<number | null>(null);
 
-    // Handle slot click for empty slots
+    // Track which slot is currently being assigned (for CoinSelector)
+    const [selectingSlotId, setSelectingSlotId] = useState<number | null>(null);
+
+    // Handle slot click for empty slots - Opens CoinSelector
     const handleAddCoin = (slotId: number) => {
-        // For now, use a simple prompt. Later integrate with a search modal.
-        const input = window.prompt('Enter coin symbol (e.g., BTC or BTCUSDT):');
-        if (!input || !input.trim()) return;
+        setSelectingSlotId(slotId);
+    };
 
-        // Normalize symbol
-        const rawSymbol = input.trim().toUpperCase();
-        const symbol = rawSymbol.endsWith('USDT') ? rawSymbol : `${rawSymbol}USDT`;
-
-        // VALIDATION: Check if symbol exists in live stream
-        const existsInStream = streamStore.tickers.has(symbol);
-
-        if (!existsInStream) {
-            // Show error message
-            alert(`⚠️ Symbol "${symbol}" not found in Binance Futures.\n\nMake sure the coin is listed on Binance Futures and try again.`);
-            return;
+    // Handle coin selection from CoinSelector
+    const handleCoinSelected = (symbol: string) => {
+        if (selectingSlotId !== null) {
+            setGridSlot(selectingSlotId, symbol);
         }
-
-        setGridSlot(slotId, symbol);
+        setSelectingSlotId(null);
     };
 
     // Handle clearing a slot
@@ -90,6 +83,13 @@ export function TacticalGrid() {
                     ))}
                 </div>
             </div>
+
+            {/* CoinSelector Modal */}
+            <CoinSelector
+                isOpen={selectingSlotId !== null}
+                onClose={() => setSelectingSlotId(null)}
+                onSelect={handleCoinSelected}
+            />
         </div>
     );
 }
