@@ -30,17 +30,45 @@ export default function NebulaCanvas() {
     }, [timeframe]);
 
 
-    // Create shared texture once
-    const createOrbTexture = (app: PIXI.Application) => {
-        const graphics = new PIXI.Graphics();
-        // FIX: Draw circles at positive offset (48,48) instead of (0,0)
-        // PixiJS v8's generateTexture() clips content at negative coordinates
-        graphics.circle(48, 48, 32);
-        graphics.fill({ color: 0xffffff, alpha: 1 });
-        // Add a glow bloom effect
-        graphics.circle(48, 48, 48);
-        graphics.fill({ color: 0xffffff, alpha: 0.3 });
-        return app.renderer.generateTexture(graphics);
+    // Create shared texture once - Stellar Plasma effect with Canvas 2D radial gradient
+    // HIGH-DPI SUPER-SAMPLING: 512px for Retina-quality sharpness
+    const createOrbTexture = (): PIXI.Texture => {
+        // Create high-resolution canvas for smooth, glowing orb (Super-Sampled)
+        const canvas = document.createElement('canvas');
+        const size = 512; // 4x resolution for crisp Retina displays
+        canvas.width = size;
+        canvas.height = size;
+
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+            // Fallback to basic texture if canvas context unavailable
+            console.warn('[NebulaCanvas] Canvas 2D context unavailable, using fallback');
+            return PIXI.Texture.WHITE;
+        }
+
+        const center = 256; // size / 2
+        const radius = 240; // Leave soft edge margin
+
+        // Create radial gradient for stellar plasma effect
+        const gradient = ctx.createRadialGradient(
+            center, center, 0,      // Inner circle (center point)
+            center, center, radius  // Outer circle
+        );
+
+        // Define color stops for glowing gas ball effect (optimized for High-DPI)
+        gradient.addColorStop(0.0, 'rgba(255, 255, 255, 1)');    // Çekirdek - Bright core
+        gradient.addColorStop(0.2, 'rgba(255, 255, 255, 0.9)');  // Yoğun iç ışık - Dense inner light
+        gradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.5)');  // Orta katman - Mid layer
+        gradient.addColorStop(1.0, 'rgba(255, 255, 255, 0)');    // Tam şeffaf - Transparent edge
+
+        // Draw the gradient circle
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(center, center, radius, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Create Pixi texture from canvas
+        return PIXI.Texture.from(canvas);
     };
 
     useEffect(() => {
@@ -76,8 +104,8 @@ export default function NebulaCanvas() {
             app.stage.addChild(container);
             mainContainerRef.current = container;
 
-            // Store texture in Ref
-            textureRef.current = createOrbTexture(app);
+            // Store texture in Ref - Stellar Plasma texture
+            textureRef.current = createOrbTexture();
 
             // MAIN RENDER LOOP (60 FPS)
             // Reads directly from Mutable Ref (streamStore)

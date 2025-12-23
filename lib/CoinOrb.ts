@@ -1,6 +1,11 @@
 import * as PIXI from 'pixi.js';
 import { TickerData } from './types';
 
+// High-DPI Texture Scale Correction
+// Texture increased from 128px to 512px (4x) for Retina sharpness
+// Apply 0.25 multiplier to maintain original visual size
+const TEXTURE_SCALE_CORRECTION = 0.25;
+
 export class CoinOrb {
     public sprite: PIXI.Sprite;
     public symbol: string;
@@ -23,6 +28,10 @@ export class CoinOrb {
     private onHoverCallback: ((data: TickerData) => void) | null = null;
     private onHoverOutCallback: (() => void) | null = null;
 
+    // Breathing/Pulse animation properties
+    private pulseOffset: number;
+    private pulseSpeed: number;
+
     constructor(data: TickerData, texture: PIXI.Texture, startX: number, startY: number) {
         this.data = data;
         this.symbol = data.symbol;
@@ -36,11 +45,16 @@ export class CoinOrb {
         // Size based on volume (Square root to dampen huge differences)
         // Base scale 0.1, max scale cap around 0.5
         const volScale = Math.min(Math.sqrt(data.volume) * 0.0005, 0.5);
-        this.originalScale = Math.max(0.05, volScale); // Minimum size
+        // Apply High-DPI texture scale correction (512px texture needs 0.25x to appear as 128px)
+        this.originalScale = Math.max(0.05, volScale) * TEXTURE_SCALE_CORRECTION;
         this.sprite.scale.set(this.originalScale);
 
         // Color tint based on initial gain/loss
         this.updateBaseTint();
+
+        // Blend mode for nebula glow effect (colors add when overlapping)
+        this.sprite.blendMode = 'add';
+        this.sprite.alpha = 0.9; // Slightly transparent for better blending
 
         // Interactive setup
         this.sprite.eventMode = 'static';
@@ -48,6 +62,10 @@ export class CoinOrb {
 
         this.sprite.on('pointerenter', () => this.setHover(true));
         this.sprite.on('pointerleave', () => this.setHover(false));
+
+        // Initialize breathing animation with random values for organic effect
+        this.pulseOffset = Math.random() * Math.PI * 2;
+        this.pulseSpeed = 0.02 + Math.random() * 0.03; // Range: 0.02 - 0.05
     }
 
     // Set parent container for label rendering (called from NebulaCanvas)
@@ -226,6 +244,13 @@ export class CoinOrb {
             this.sprite.y = this.targetY;
         } else {
             this.sprite.y += dy * ease;
+        }
+
+        // Breathing/Pulse animation (skip when hovered to avoid scale conflict)
+        if (!this.isHovered) {
+            const breathFactor = 1 + Math.sin(performance.now() * 0.001 * this.pulseSpeed + this.pulseOffset) * 0.1;
+            const pulseScale = this.originalScale * breathFactor;
+            this.sprite.scale.set(pulseScale);
         }
 
         // Update label position if visible

@@ -45,3 +45,23 @@
 - **Performance**: Optimized cursor tracking with `requestAnimationFrame` + CSS `transform`.
 - **Visual**: Added enhanced glow effect with dual shadow layers.
 - **Status**: Production Ready.
+
+### [Sprint Hotel: Stellar Plasma Texture]
+- **Date**: 2025-12-23
+- **Visual Upgrade**: Replaced PIXI.Graphics orbs with Canvas 2D radial gradient texture.
+- **Resolution**: Increased from 96px to 128px for smoother appearance.
+- **Gradient**: 4-stop radial (bright core → transparent edge) for glowing gas ball effect.
+- **Status**: Production Ready.
+
+### [Sprint India: Breathing Effect]
+- **Date**: 2025-12-23
+- **Animation**: Added sine-wave pulse animation to orbs (±10% scale).
+- **Properties**: `pulseOffset` (random phase), `pulseSpeed` (0.02-0.05).
+- **Behavior**: Disabled during hover to avoid scale conflicts.
+- **Status**: Production Ready.
+
+### [Sprint Juliet: Blend Mode Polish]
+- **Date**: 2025-12-23
+- **Blend Mode**: Added `blendMode = 'add'` for nebula glow when orbs overlap.
+- **Alpha**: Set base alpha to 0.9 for smoother blending.
+- **Status**: Production Ready.
