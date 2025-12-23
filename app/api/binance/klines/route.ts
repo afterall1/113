@@ -14,11 +14,11 @@ export async function GET(request: NextRequest) {
     }
 
     try {
-        const binanceUrl = `https://fapi.binance.com/fapi/v1/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`;
+        const binanceUrl = `https://fapi.binance.com/fapi/v1/klines?symbol=${symbol}&interval=${interval}&limit=1500`;
 
         const response = await fetch(binanceUrl, {
             headers: { 'Content-Type': 'application/json' },
-            next: { revalidate: 60 } // Cache for 60 seconds
+            next: { revalidate: 0 } // No cache to force fresh data
         });
 
         if (!response.ok) {
@@ -35,6 +35,8 @@ export async function GET(request: NextRequest) {
             low: parseFloat(k[3]),
             close: parseFloat(k[4]),
         }));
+
+        console.log(`[API/Klines] Fetched ${candleData.length} candles for ${symbol}`);
 
         return NextResponse.json(candleData);
 

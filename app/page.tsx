@@ -24,25 +24,34 @@ export default function Home() {
   useEffect(() => {
     const checkBoot = setInterval(() => {
       const count = streamStore.tickers.size;
-
-      // Simulating "Booting" based on data buffer
-      // Goal: Wait until we have ~20 tickers to show something interesting
-      if (count > 20) {
+      // Goal: Wait until we have ~5 tickers (Reduced from 20)
+      if (count > 5) {
         setIsBooted(true);
         clearInterval(checkBoot);
       } else {
-        // Fake progress for UI feedback
         setProgress(prev => Math.min(prev + 5, 90));
       }
     }, 100);
 
-    return () => clearInterval(checkBoot);
+    // FORCE BOOT FAILURE SAFEGUARD
+    // If socket is blocked or slow, boot anyway after 3 seconds
+    const forceBoot = setTimeout(() => {
+      setIsBooted(true);
+    }, 3000);
+
+    return () => {
+      clearInterval(checkBoot);
+      clearTimeout(forceBoot);
+    };
   }, []);
 
   return (
     <main className="relative w-full h-screen bg-black overflow-hidden flex flex-col">
       {!isBooted ? (
-        <div className="absolute inset-0 flex flex-col items-center justify-center z-50 bg-black text-white">
+        <div
+          className="absolute inset-0 flex flex-col items-center justify-center z-50 bg-black text-white"
+          style={{ backgroundColor: '#000000' }} // Fallback if Tailwind fails
+        >
           <div className="w-64 h-1 bg-white/10 rounded-full overflow-hidden mb-4">
             <div
               className="h-full bg-teal-500 shadow-[0_0_15px_rgba(20,184,166,0.5)] transition-all duration-300 ease-out"

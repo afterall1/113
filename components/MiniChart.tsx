@@ -20,7 +20,7 @@ export function MiniChart({ symbol, color = '#22c55e', interval = '15m' }: MiniC
 
     // Fetch data via Proxy API
     const { data: candleData, isLoading } = useSWR<CandleData[]>(
-        symbol ? `/api/binance/klines?symbol=${symbol}&interval=${interval}` : null,
+        symbol ? `/api/binance/klines?symbol=${symbol}&interval=${interval}&limit=1500` : null,
         fetcher,
         { refreshInterval: 5000 }
     );
@@ -121,7 +121,10 @@ export function MiniChart({ symbol, color = '#22c55e', interval = '15m' }: MiniC
             // We'll fit content initially.
             // Check if we already have visible logical range? 
             // For simple MiniChart, assume auto-fit is desired behavior for now.
-            chartRef.current.timeScale().fitContent();
+            // Force fit content after a small delay to ensure layout validation
+            setTimeout(() => {
+                chartRef.current?.timeScale().fitContent();
+            }, 50);
         }
     }, [candleData]);
 
@@ -137,6 +140,13 @@ export function MiniChart({ symbol, color = '#22c55e', interval = '15m' }: MiniC
 
             {/* Overlay Gradient for seamless integration? Optional, but nice for Nebula feel */}
             <div className="absolute inset-0 pointer-events-none shadow-[inset_0_0_20px_rgba(0,0,0,0.5)]" />
+
+            {/* DEBUG: Data Count Indicator */}
+            {candleData && (
+                <div className="absolute bottom-1 left-1 text-[9px] text-slate-600 font-mono z-20">
+                    DATA: {candleData.length} M
+                </div>
+            )}
         </div>
     );
 }
