@@ -17,6 +17,8 @@ This document locks the core technology versions for the Liquidity Nebula projec
 - **@pixi/react**: Latest Stable (Compatible with React 19)
 
 ## State & Data
-- **SWR / React Query**: Recommended for caching (TBD)
-- **WebSocket**: Native browser WebSocket API
-- **Constraint**: `useState` forbidden for socket streams. Use `Ref` + `Subscribers`.
+- **SWR**: LOCKED. Mandatory for all client-side async data fetching (REST API calls).
+- **WebSocket**: Native browser WebSocket API (strictly for price/volume stream).
+- **Constraint**:
+  - High Frequency (>1Hz) -> WebSocket + Mutable Ref.
+  - Low Frequency (User Interaction) -> SWR + React State.

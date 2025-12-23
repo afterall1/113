@@ -8,6 +8,7 @@
 
 ## 1. Core Logic
 - **Dynamic Percent Change**: The application must calculate percentage changes dynamically based on user selection (e.g., 1m, 5m, 15m, 1h, 4h, 1d). The visualization should update instantly to reflect the selected volatility timeframe.
+- **On-Demand Data Pattern (NEW)**: Detailed fundamental data (FDV, Unlocks, Tags) is NOT streamed. It is fetched asynchronously via `SWR` only when a user selects an orb (Lazy Loading).
 
 ## 2. Visual Language
 - **Theme**: Dark Mode ONLY. No light mode support.
@@ -16,6 +17,14 @@
   - **Center (Neutral)**: Elements with little to no change (~0%). Stable orbit.
   - **Bottom Hemisphere (Losers)**: Red/Orange hues. Vertical positioning indicates magnitude of loss.
 - **Aesthetic**: Nebula/Space theme. Glowing elements, bloom effects, smooth physics-based movement.
+- **Token Unlock Spectrum (Stacked Bar)**:
+  - Visualizing unlock allocations MUST use the following semantic color palette:
+  - **Core Team**: Orange (`#F97316`)
+  - **Investors**: Purple (`#A855F7`)
+  - **Ecosystem**: Teal (`#14B8A6`)
+  - **Community**: Green (`#22C55E`)
+  - **Treasury**: Blue (`#3B82F6`)
+  - **Style**: Rounded-full bars, stacked horizontally, with a legend below.
 
 ## 3. Data Structure
 The application will strictly adhere to the following TypeScript interface for market data:
@@ -27,6 +36,31 @@ interface TickerData {
   volume: number;             // 24h Volume or selected timeframe volume
   priceChangePercent: number; // Dynamic based on timeframe
   timeFrame: string;          // e.g., "1m", "15m", "1h"
+}
+// High-Frequency Stream Data
+interface TickerData {
+  symbol: string;
+  price: number;
+  volume: number;
+  priceChangePercent: number;
+  timeFrame: string;
+}
+
+// Low-Frequency On-Demand Data
+interface TokenMetadata {
+  marketCap: number;
+  fdv: number;
+  circulatingSupply: number;
+  maxSupply: number;
+  nextUnlock: {
+    date: string;
+    amount: number;
+    valueUSD: number;
+    percentOfSupply: number;
+    allocations: Array<{ category: string; percent: number }>;
+  };
+  tags: string[];
+  chains: string[];
 }
 ```
 

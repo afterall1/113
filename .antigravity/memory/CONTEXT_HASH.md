@@ -1,23 +1,24 @@
 # CONTEXT HASH
-> **Hash**: `MVP-V1-COMPLETE`
-> **Timestamp**: 2025-12-17
+> **Hash**: `MVP-V1.1-DATA-ENRICHED`
+> **Timestamp**: 2025-12-23
 > **Status**: STABLE
 
 ## MVP Features
-- [x] **Core Codex**: `PROJECT_BIBLE.md` & `TECH_STACK_LOCK.md` established.
-- [x] **Data Ingestion**: Binance `!ticker@arr` stream with 500ms throttling.
+- [x] **Core Codex**: Project Bible & Tech Stack established.
 - [x] **Visualization**: PixiJS Nebula Canvas with dynamic CoinOrbs.
-- [x] **HUD Overlay**: Glassmorphic UI, Search, Timeframe Selector.
-- [x] **Interaction**: Detail Drawer side-panel.
+- [x] **Squadron Protocol**: Watchlist & Favorites logic (Gold Tint).
+- [x] **Data Enrichment**: On-demand fundamental data fetching (SWR).
+- [x] **Advanced UI**: DetailDrawer with Token Unlock Stacked Bars.
 
 ## Next Phase
-- **Backend Optimization**: Shift some logic to server if client load gets too high.
+- **Backend Real Implementation**: Replace mock `tokenMetadata.ts` with real CoinGecko/CMC API.
 - **Charts**: Add real Sparkline/Candle charts to DetailDrawer.
 - **Mobile**: Touch gesture optimization.
 
-### [Sprint Delta: Squadron Protocol]
-- **Date**: 2025-12-18
-- **Feature Added**: Watchlist Panel (Left Sidebar).
-- **Architecture Change**: Added `zustand/middleware` for LocalStorage persistence.
-- **Visual Update**: Implemented "Gold Tint" shader logic for favorite orbs in `CoinOrb.ts`.
-- **Status**: Production Ready. Codebase synchronized with Phase 12 prompts.
+### [Sprint Delta: Fundamental Intelligence]
+- **Date**: 2025-12-23
+- **Feature Added**: DetailDrawer Enrichment.
+- **Architecture Change**: Integrated `SWR` for metadata fetching.
+- **Visual Update**: Implemented "Token Unlock Stacked Bar" with semantic color coding.
+- **New Service**: `lib/services/tokenMetadata.ts` (Mock).
+- **Status**: Production Ready.
