@@ -1,3 +1,6 @@
+# Project Bible
+...
+
 # Liquidity Nebula Project Bible
 > [!IMPORTANT]
 > **Status**: v1.0.0 RELEASE CANDIDATE
@@ -32,3 +35,21 @@ interface TickerData {
   - **Storage**: Use `Mutable Ref` or `Map` outside React Cycle.
   - **Rendering**: Read directly from storage in `requestAnimationFrame` or `PixiTicker`.
   - **State**: Only use `Zustand/Context` for low-frequency UI updates (Selection, filtering).
+
+## 5. Feature Specification: The Squadron (Watchlist)
+> **Status**: Active since v1.1
+> **Purpose**: Allows users to track specific assets in a dedicated panel.
+
+- **Data Persistence**:
+  - The watchlist is stored in `localStorage` via Zustand Persist Middleware.
+  - Key: `nebula-storage`.
+  - Behavior: Data must survive browser refresh.
+
+- **Visual Logic (Overrides Section 2)**:
+  - **Favorite Status**: Coins in the watchlist MUST be visually distinct.
+  - **Color Rule**: Favorites render with a **Gold/Amber tint** (`0xFFD700`) regardless of price action.
+  - **Z-Index**: Favorites must act as "Flagships", floating visibly *above* standard market noise.
+
+- **UI Components**:
+  - **Command Deck**: A collapsible sidebar on the left.
+  - **Interaction**: Adding a coin adds it to the store AND highlights the corresponding orb in WebGL.
