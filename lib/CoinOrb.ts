@@ -52,8 +52,8 @@ export class CoinOrb {
         // Color tint based on initial gain/loss
         this.updateBaseTint();
 
-        // Blend mode for nebula glow effect (colors add when overlapping)
-        this.sprite.blendMode = 'add';
+        // Blend mode: Switched to 'normal' for maximum sharpness (removes hazy glow)
+        this.sprite.blendMode = 'normal';
         this.sprite.alpha = 0.9; // Slightly transparent for better blending
 
         // Interactive setup

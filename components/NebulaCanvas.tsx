@@ -47,7 +47,7 @@ export default function NebulaCanvas() {
         }
 
         const center = 256; // size / 2
-        const radius = 240; // Leave soft edge margin
+        const radius = 200; // Reduced radius for tighter margin (Sharpening)
 
         // Create radial gradient for stellar plasma effect
         const gradient = ctx.createRadialGradient(
@@ -56,10 +56,12 @@ export default function NebulaCanvas() {
         );
 
         // Define color stops for glowing gas ball effect (optimized for High-DPI)
-        gradient.addColorStop(0.0, 'rgba(255, 255, 255, 1)');    // Çekirdek - Bright core
-        gradient.addColorStop(0.2, 'rgba(255, 255, 255, 0.9)');  // Yoğun iç ışık - Dense inner light
-        gradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.5)');  // Orta katman - Mid layer
-        gradient.addColorStop(1.0, 'rgba(255, 255, 255, 0)');    // Tam şeffaf - Transparent edge
+        // SHARPENING V4 (VECTOR-HARD):
+        // User feedback: "Still too hazy".
+        // Solution: Remove falloff entirely. Create a hard-edge "Cutout" disc.
+        gradient.addColorStop(0.0, 'rgba(255, 255, 255, 1)');    // Core - Pure White
+        gradient.addColorStop(0.98, 'rgba(255, 255, 255, 1)');   // Body - Solid White to 98%
+        gradient.addColorStop(1.0, 'rgba(255, 255, 255, 0)');    // Edge - Instant Transparent Cut
 
         // Draw the gradient circle
         ctx.fillStyle = gradient;
@@ -68,7 +70,15 @@ export default function NebulaCanvas() {
         ctx.fill();
 
         // Create Pixi texture from canvas
-        return PIXI.Texture.from(canvas);
+        const texture = PIXI.Texture.from(canvas);
+
+        // Advanced High-DPI settings (configured on source)
+        // DISABLING MIPMAPS: Mipmaps cause blur when high-res textures are scaled down heavily.
+        // We want crisp sampling from the high-res source.
+        texture.source.scaleMode = 'linear';
+        texture.source.autoGenerateMipmaps = false; // <--- CHANGED: False for sharpness
+
+        return texture;
     };
 
     useEffect(() => {
@@ -88,6 +98,9 @@ export default function NebulaCanvas() {
                 backgroundColor: 0x050505,
                 antialias: true,
                 resolution: window.devicePixelRatio || 1,
+                autoDensity: true, // Syncs CSS style with resolution
+                preference: 'webgl', // Enforce WebGL for stability
+                roundPixels: true, // <--- SHARPNESS: Force integer coordinates to prevent sub-pixel blur
             });
 
             if (containerRef.current) {
