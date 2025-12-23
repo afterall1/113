@@ -13,18 +13,18 @@
 ## 2. Visual Language
 - **Theme**: Dark Mode ONLY. No light mode support.
 - **Spatial Layout**:
-  - **Top Hemisphere (Gainers)**: Green/Teal hues. Use vertical positioning to indicate magnitude of gain.
-  - **Center (Neutral)**: Elements with little to no change (~0%). Stable orbit.
-  - **Bottom Hemisphere (Losers)**: Red/Orange hues. Vertical positioning indicates magnitude of loss.
-- **Aesthetic**: Nebula/Space theme. Glowing elements, bloom effects, smooth physics-based movement.
+  - **Top Hemisphere (Gainers)**: Green/Teal hues. Vertical positioning = magnitude.
+  - **Center (Neutral)**: Stable orbit elements.
+  - **Bottom Hemisphere (Losers)**: Red/Orange hues.
+  - **Interaction Layer (HUD)**: Detailed data MUST appear as a centralized, floating holographic window ("Aerogel Glass"). Do not use sidebars for primary asset details.
+- **Aesthetic**: Nebula/Space theme. Glowing elements, bloom effects, smooth physics.
+- **Animation Standard**: Elements should "snap" or "materialize" (Scale/Fade) rather than slide.
 - **Token Unlock Spectrum (Stacked Bar)**:
-  - Visualizing unlock allocations MUST use the following semantic color palette:
   - **Core Team**: Orange (`#F97316`)
   - **Investors**: Purple (`#A855F7`)
   - **Ecosystem**: Teal (`#14B8A6`)
   - **Community**: Green (`#22C55E`)
   - **Treasury**: Blue (`#3B82F6`)
-  - **Style**: Rounded-full bars, stacked horizontally, with a legend below.
 
 ## 3. Data Structure
 The application will strictly adhere to the following TypeScript interface for market data:

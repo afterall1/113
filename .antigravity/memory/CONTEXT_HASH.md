@@ -1,19 +1,27 @@
 # CONTEXT HASH
-> **Hash**: `MVP-V1.1-DATA-ENRICHED`
-> **Timestamp**: 2025-12-23
+> **Hash**: `MVP-V1.2-HOLODECK`
+> **Timestamp**: 2025-12-23 (Late Session)
 > **Status**: STABLE
 
 ## MVP Features
 - [x] **Core Codex**: Project Bible & Tech Stack established.
-- [x] **Visualization**: PixiJS Nebula Canvas with dynamic CoinOrbs.
-- [x] **Squadron Protocol**: Watchlist & Favorites logic (Gold Tint).
-- [x] **Data Enrichment**: On-demand fundamental data fetching (SWR).
-- [x] **Advanced UI**: DetailDrawer with Token Unlock Stacked Bars.
+- [x] **Visualization**: PixiJS Nebula Canvas with dynamic CoinOrbs (Vector-Hard Profile).
+- [x] **Squadron Protocol**: Watchlist & Favorites logic.
+- [x] **Holographic HUD**: Centralized Detail Window ("Aerogel" Glass).
+- [x] **Chart Infrastructure**: MiniChart with Proxy & Premium UI.
+
 
 ## Next Phase
 - **Backend Real Implementation**: Replace mock `tokenMetadata.ts` with real CoinGecko/CMC API.
 - **Charts**: Add real Sparkline/Candle charts to DetailDrawer.
 - **Mobile**: Touch gesture optimization.
+
+### [Sprint Kilo: Holographic HUD]
+- **Date**: 2025-12-23
+- **Feature Added**: UI Overhaul (Drawer -> Central Modal).
+- **Visual**: "Aerogel" glass texture, "Quantum Snap" animation, Top-glow borders.
+- **Mobile**: Implemented Bottom-Sheet logic for smaller screens.
+- **Status**: Production Ready.
 
 ### [Sprint Delta: Fundamental Intelligence]
 - **Date**: 2025-12-23
