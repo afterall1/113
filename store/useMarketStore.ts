@@ -8,6 +8,7 @@ export type ViewMode = 'GLOBAL' | 'SQUADRON';
 interface MarketState {
     tickers: Map<string, TickerData>;
     selectedTicker: TickerData | null;
+    hoveredTicker: TickerData | null;
     searchQuery: string;
     timeframe: string;
     isMuted: boolean;
@@ -18,6 +19,7 @@ interface MarketState {
 
     updateBatch: (newTickers: TickerData[]) => void;
     setSelectedTicker: (ticker: TickerData | null) => void;
+    setHoveredTicker: (ticker: TickerData | null) => void;
     setSearchQuery: (query: string) => void;
     setTimeframe: (tf: string) => void;
     setIsMuted: (muted: boolean) => void;
@@ -32,6 +34,7 @@ export const useMarketStore = create<MarketState>()(
         (set) => ({
             tickers: new Map(),
             selectedTicker: null,
+            hoveredTicker: null,
             searchQuery: '',
             timeframe: '24h',
             isMuted: true,
@@ -50,6 +53,7 @@ export const useMarketStore = create<MarketState>()(
                 }),
 
             setSelectedTicker: (ticker) => set({ selectedTicker: ticker }),
+            setHoveredTicker: (ticker) => set({ hoveredTicker: ticker }),
             setSearchQuery: (query) => set({ searchQuery: query }),
             setTimeframe: (tf) => set({ timeframe: tf }),
             setIsMuted: (muted) => set({ isMuted: muted }),

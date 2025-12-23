@@ -19,6 +19,10 @@ export class CoinOrb {
     private hoverRing: PIXI.Graphics | null = null;
     private parentContainer: PIXI.Container | null = null;
 
+    // Callback refs for external hover notification
+    private onHoverCallback: ((data: TickerData) => void) | null = null;
+    private onHoverOutCallback: (() => void) | null = null;
+
     constructor(data: TickerData, texture: PIXI.Texture, startX: number, startY: number) {
         this.data = data;
         this.symbol = data.symbol;
@@ -121,9 +125,11 @@ export class CoinOrb {
         if (active) {
             this.sprite.zIndex = 100; // Bring to front
             this.showLabel();
+            this.onHoverCallback?.(this.data);
         } else {
             this.sprite.zIndex = 1;
             this.hideLabel();
+            this.onHoverOutCallback?.();
         }
     }
 
@@ -204,6 +210,11 @@ export class CoinOrb {
 
     bindInteraction(onSelect: (data: TickerData) => void) {
         this.sprite.on('pointerdown', () => onSelect(this.data));
+    }
+
+    bindHover(onHover: (data: TickerData) => void, onHoverOut: () => void) {
+        this.onHoverCallback = onHover;
+        this.onHoverOutCallback = onHoverOut;
     }
 
     animate() {

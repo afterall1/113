@@ -9,6 +9,7 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 import { useBinanceStream, streamStore } from "@/hooks/useBinanceStream";
 import { useTimeframeSync } from "@/hooks/useTimeframeSync";
 import WatchlistPanel from "@/components/WatchlistPanel";
+import TargetingSystem from "@/components/TargetingSystem";
 
 export default function Home() {
   const [isBooted, setIsBooted] = useState(false);
@@ -57,6 +58,9 @@ export default function Home() {
           <div className="animate-in fade-in duration-1000">
             {/* Visualization Background */}
             <NebulaCanvas />
+
+            {/* Targeting System Hover Card */}
+            <TargetingSystem />
 
             {/* Watchlist Sidebar (Left) */}
             <WatchlistPanel />

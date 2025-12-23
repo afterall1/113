@@ -150,6 +150,10 @@ export default function NebulaCanvas() {
                         orb.bindInteraction((clickedData) => {
                             useMarketStore.getState().setSelectedTicker(clickedData);
                         });
+                        orb.bindHover(
+                            (hoveredData) => useMarketStore.getState().setHoveredTicker(hoveredData),
+                            () => useMarketStore.getState().setHoveredTicker(null)
+                        );
                         mainContainerRef.current!.addChild(orb.sprite);
                         orbsRef.current.set(symbol, orb);
                     }
