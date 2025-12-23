@@ -6,7 +6,11 @@ import { useMarketStore } from '@/store/useMarketStore';
 import { CoinOrb } from '@/lib/CoinOrb';
 import { streamStore } from '@/hooks/useBinanceStream';
 
-export default function NebulaCanvas() {
+interface NebulaCanvasProps {
+    active?: boolean; // When false, pauses GPU rendering to save resources
+}
+
+export default function NebulaCanvas({ active = true }: NebulaCanvasProps) {
     const containerRef = useRef<HTMLDivElement>(null);
     const appRef = useRef<PIXI.Application | null>(null);
     const orbsRef = useRef<Map<string, CoinOrb>>(new Map());
@@ -123,9 +127,12 @@ export default function NebulaCanvas() {
             // MAIN RENDER LOOP (60 FPS)
             // Reads directly from Mutable Ref (streamStore)
             app.ticker.add(() => {
+                // SAFETY: Exit early if refs are not ready
+                if (!mainContainerRef.current || !textureRef.current) return;
+
                 const screenCenterY = app.screen.height / 2;
                 const screenWidth = app.screen.width;
-                const texture = textureRef.current!;
+                const texture = textureRef.current;
 
                 const state = useMarketStore.getState();
                 const hasQuery = state.searchQuery.length > 0;
@@ -175,9 +182,10 @@ export default function NebulaCanvas() {
                 else if (activeTimeframe === '15m') scaleFactor = 100;
                 else if (activeTimeframe === '1m') scaleFactor = 200;
 
-                // SQUADRON mode: Closer grouping, larger orbs
-                const squadronScaleBoost = viewMode === 'SQUADRON' ? 1.2 : 1.0;
-                const squadronCenterPull = viewMode === 'SQUADRON' ? 0.7 : 1.0; // Pull closer to center
+                // NEBULA mode: Show all. GRID mode: Still show all orbs but with adjusted styling
+                // Favorites get special highlighting regardless of mode
+                const squadronScaleBoost = 1.0;
+                const squadronCenterPull = 1.0;
 
                 // Iterate over ALL tickers in the Stream Store
                 streamStore.tickers.forEach((data, symbol) => {
@@ -201,7 +209,8 @@ export default function NebulaCanvas() {
 
                     // VIEW MODE FILTERING
                     const isInSquadron = favoritesSet.has(symbol);
-                    const shouldRender = viewMode === 'GLOBAL' || isInSquadron;
+                    // In both modes, render all orbs (Grid view handles its own filtering)
+                    const shouldRender = true;
 
                     if (!shouldRender) {
                         // Hide orb but keep in memory for instant switching
@@ -245,7 +254,7 @@ export default function NebulaCanvas() {
 
                 // Debug Logging (Throttled)
                 if (Date.now() % 2000 < 20) {
-                    const visibleCount = viewMode === 'SQUADRON' ? favorites.length : streamStore.tickers.size;
+                    const visibleCount = streamStore.tickers.size;
                     console.log(`[Nebula Debug] Mode: ${viewMode}, Visible: ${visibleCount}, Timeframe: ${activeTimeframe}`);
                 }
 
@@ -263,6 +272,16 @@ export default function NebulaCanvas() {
             }
         };
     }, []); // Empty dependency array = Single Mount!
+
+    // GPU OPTIMIZATION: Pause/Resume ticker when switching views
+    useEffect(() => {
+        if (!appRef.current) return;
+        if (active) {
+            appRef.current.ticker.start();
+        } else {
+            appRef.current.ticker.stop();
+        }
+    }, [active]);
 
     return (
         <div

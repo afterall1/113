@@ -32,7 +32,25 @@ export default class ErrorBoundary extends Component<Props, State> {
                         Critical rendering failure detected. This is likely due to a WebGL context loss or data corruption.
                     </p>
                     <button
-                        onClick={() => window.location.reload()}
+                        onClick={() => {
+                            // Clear potentially corrupted grid data from localStorage
+                            try {
+                                const storageKey = 'nebula-storage';
+                                const stored = localStorage.getItem(storageKey);
+                                if (stored) {
+                                    const parsed = JSON.parse(stored);
+                                    // Reset gridSlots to empty while preserving other data
+                                    if (parsed.state) {
+                                        parsed.state.gridSlots = Array.from({ length: 9 }, (_, i) => ({ id: i, symbol: null }));
+                                        localStorage.setItem(storageKey, JSON.stringify(parsed));
+                                    }
+                                }
+                            } catch (e) {
+                                // If parsing fails, just clear the whole thing
+                                localStorage.removeItem('nebula-storage');
+                            }
+                            window.location.reload();
+                        }}
                         className="px-6 py-3 bg-white/10 text-teal-400 border border-teal-500/30 rounded-full hover:bg-white/20 transition-all"
                     >
                         REBOOT SYSTEM

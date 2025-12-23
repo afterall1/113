@@ -9,20 +9,24 @@ interface MiniChartProps {
     symbol: string;
     color?: string;
     interval?: string;
+    className?: string; // Optional: Allow parent to control container styling
 }
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-export function MiniChart({ symbol, color = '#22c55e', interval = '15m' }: MiniChartProps) {
+export function MiniChart({ symbol, color = '#22c55e', interval = '15m', className }: MiniChartProps) {
     const chartContainerRef = useRef<HTMLDivElement>(null);
     const chartRef = useRef<IChartApi | null>(null);
     const seriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
 
     // Fetch data via Proxy API
-    const { data: candleData, isLoading } = useSWR<CandleData[]>(
+    const { data: candleData, isLoading, error } = useSWR<CandleData[]>(
         symbol ? `/api/binance/klines?symbol=${symbol}&interval=${interval}&limit=1500` : null,
         fetcher,
-        { refreshInterval: 5000 }
+        {
+            refreshInterval: 5000,
+            shouldRetryOnError: false, // Don't retry on invalid symbols
+        }
     );
 
     useEffect(() => {
@@ -105,7 +109,8 @@ export function MiniChart({ symbol, color = '#22c55e', interval = '15m' }: MiniC
 
     // Data Update Effect
     useEffect(() => {
-        if (candleData && seriesRef.current && chartRef.current) {
+        // Guard: Ensure candleData is actually an array (API might return error object)
+        if (candleData && Array.isArray(candleData) && seriesRef.current && chartRef.current) {
             // Ensure data is valid and sorted
             // lightweight-charts expects sorted ascending time
             const validData = candleData
@@ -133,6 +138,16 @@ export function MiniChart({ symbol, color = '#22c55e', interval = '15m' }: MiniC
             {isLoading && (
                 <div className="absolute inset-0 flex items-center justify-center text-slate-500 text-xs font-mono z-10 bg-black/50 backdrop-blur-sm tracking-wider">
                     <span className="animate-pulse">LOADING MARKET DATA...</span>
+                </div>
+            )}
+            {/* Error State */}
+            {error && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-red-500 text-xs font-mono z-10 bg-black/80 backdrop-blur-sm">
+                    <svg className="w-8 h-8 mb-2 text-red-500/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    <span className="tracking-wider">DATA UNAVAILABLE</span>
+                    <span className="text-[9px] text-zinc-600 mt-1">{symbol}</span>
                 </div>
             )}
             {/* Chart Container */}

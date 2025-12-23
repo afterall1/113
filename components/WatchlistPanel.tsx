@@ -18,7 +18,7 @@ export default function WatchlistPanel() {
     // Inverted logic: isCollapsed = !isWatchlistOpen
     const isCollapsed = !isWatchlistOpen;
 
-    const isSquadronMode = viewMode === 'SQUADRON';
+    // Favorites panel active state (for styling only)
 
     const handleAdd = (e: React.FormEvent) => {
         e.preventDefault();
@@ -67,32 +67,9 @@ export default function WatchlistPanel() {
                             </svg>
                             SQUADRON
                         </h2>
-
-                        {/* View Mode Toggle */}
-                        <button
-                            onClick={() => setViewMode(isSquadronMode ? 'GLOBAL' : 'SQUADRON')}
-                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono transition-all ${isSquadronMode
-                                ? 'bg-teal-500/20 text-teal-400 border border-teal-500/50'
-                                : 'bg-white/5 text-zinc-500 border border-white/10 hover:text-white hover:border-white/20'
-                                }`}
-                            title={isSquadronMode ? 'Switch to Global View' : 'Switch to Squadron View'}
-                        >
-                            {/* Radar/Eye Icon */}
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <circle cx="12" cy="12" r="10" />
-                                <circle cx="12" cy="12" r="6" />
-                                <circle cx="12" cy="12" r="2" />
-                                <line x1="12" y1="2" x2="12" y2="4" />
-                                <line x1="12" y1="20" x2="12" y2="22" />
-                                <line x1="2" y1="12" x2="4" y2="12" />
-                                <line x1="20" y1="12" x2="22" y2="12" />
-                            </svg>
-                            {isSquadronMode ? 'ACTIVE' : 'FOCUS'}
-                        </button>
                     </div>
                     <p className="text-xs text-zinc-500 mt-2 font-mono">
                         {favorites.length} ASSETS TRACKED
-                        {isSquadronMode && <span className="text-teal-400 ml-2">• FOCUSED</span>}
                     </p>
                 </div>
 
@@ -181,7 +158,7 @@ export default function WatchlistPanel() {
 
                 {/* Footer */}
                 <div className="p-4 border-t border-white/10 text-[10px] text-zinc-600 text-center font-mono">
-                    MODE: <span className={isSquadronMode ? 'text-teal-400' : 'text-zinc-500'}>{viewMode}</span> / {timeframe} / <span className="text-teal-500">LIVE</span>
+                    MODE: <span className="text-zinc-500">{viewMode}</span> / {timeframe} / <span className="text-teal-500">LIVE</span>
                 </div>
             </div>
         </div>

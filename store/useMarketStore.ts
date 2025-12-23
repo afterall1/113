@@ -2,8 +2,18 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { TickerData } from '@/lib/types';
 
-// View Mode Type
-export type ViewMode = 'GLOBAL' | 'SQUADRON';
+// View Mode Type - Extended for Tactical Grid
+export type ViewMode = 'NEBULA' | 'GRID';
+
+// Grid Slot Interface for Tactical Grid
+export interface GridSlot {
+    id: number;
+    symbol: string | null;
+}
+
+// Default 9 empty slots for the Tactical Grid (3x3)
+const createDefaultGridSlots = (): GridSlot[] =>
+    Array.from({ length: 9 }, (_, i) => ({ id: i, symbol: null }));
 
 interface MarketState {
     tickers: Map<string, TickerData>;
@@ -17,6 +27,11 @@ interface MarketState {
     viewMode: ViewMode;
     isWatchlistOpen: boolean;
 
+    // Tactical Grid State
+    gridSlots: GridSlot[];
+    activeSlotId: number | null;
+
+    // Existing Actions
     updateBatch: (newTickers: TickerData[]) => void;
     setSelectedTicker: (ticker: TickerData | null) => void;
     setHoveredTicker: (ticker: TickerData | null) => void;
@@ -27,6 +42,12 @@ interface MarketState {
     toggleFavorite: (symbol: string) => void;
     setViewMode: (mode: ViewMode) => void;
     setWatchlistOpen: (isOpen: boolean) => void;
+
+    // Tactical Grid Actions
+    setGridSlot: (id: number, symbol: string) => void;
+    clearGridSlot: (id: number) => void;
+    setActiveSlotId: (id: number | null) => void;
+    toggleViewMode: () => void;
 }
 
 export const useMarketStore = create<MarketState>()(
@@ -40,8 +61,12 @@ export const useMarketStore = create<MarketState>()(
             isMuted: true,
             baselines: new Map(),
             favorites: [],
-            viewMode: 'GLOBAL',
+            viewMode: 'NEBULA',
             isWatchlistOpen: false,
+
+            // Tactical Grid Initial State
+            gridSlots: createDefaultGridSlots(),
+            activeSlotId: null,
 
             updateBatch: (newTickers) =>
                 set((state) => {
@@ -70,6 +95,25 @@ export const useMarketStore = create<MarketState>()(
             setViewMode: (mode) => set({ viewMode: mode }),
 
             setWatchlistOpen: (isOpen) => set({ isWatchlistOpen: isOpen }),
+
+            // Tactical Grid Actions
+            setGridSlot: (id, symbol) => set((state) => ({
+                gridSlots: state.gridSlots.map(slot =>
+                    slot.id === id ? { ...slot, symbol } : slot
+                ),
+            })),
+
+            clearGridSlot: (id) => set((state) => ({
+                gridSlots: state.gridSlots.map(slot =>
+                    slot.id === id ? { ...slot, symbol: null } : slot
+                ),
+            })),
+
+            setActiveSlotId: (id) => set({ activeSlotId: id }),
+
+            toggleViewMode: () => set((state) => ({
+                viewMode: state.viewMode === 'NEBULA' ? 'GRID' : 'NEBULA',
+            })),
         }),
         {
             name: 'nebula-storage', // Unique name for LocalStorage key
@@ -79,6 +123,7 @@ export const useMarketStore = create<MarketState>()(
                 isMuted: state.isMuted,
                 timeframe: state.timeframe,
                 viewMode: state.viewMode,
+                gridSlots: state.gridSlots, // Persist Tactical Grid configuration
             }),
         }
     )

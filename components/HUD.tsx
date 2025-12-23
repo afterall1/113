@@ -10,7 +10,9 @@ export default function HUD() {
         timeframe,
         setTimeframe,
         isMuted,
-        setIsMuted
+        setIsMuted,
+        viewMode,
+        toggleViewMode
     } = useMarketStore();
 
     const timeframes = ['1m', '15m', '1h', '4h', '24h', '7d'];
@@ -22,8 +24,30 @@ export default function HUD() {
         engine.setMute(newState);
     };
 
+    const isGridMode = viewMode === 'GRID';
+
     return (
         <div className="fixed top-6 left-1/2 -translate-x-1/2 flex items-center gap-4 p-2 rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 shadow-2xl z-20 transition-all hover:bg-black/60">
+
+            {/* Grid View Toggle */}
+            <button
+                onClick={toggleViewMode}
+                className={`group relative p-1.5 rounded-lg transition-all duration-300 ${isGridMode
+                        ? 'text-amber-400 bg-amber-500/15 border border-amber-500/40 shadow-[0_0_12px_rgba(245,158,11,0.25)]'
+                        : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5 border border-transparent hover:border-white/10'
+                    }`}
+                title={isGridMode ? "Switch to Nebula View" : "Switch to Grid View"}
+            >
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                </svg>
+                {/* Active Glow */}
+                {isGridMode && (
+                    <span className="absolute inset-0 rounded-lg animate-pulse bg-amber-500/10" />
+                )}
+            </button>
+
+            <div className="h-6 w-px bg-white/10"></div>
 
             {/* Sound Toggle */}
             <button
