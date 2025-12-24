@@ -8,6 +8,12 @@
 
 ## 1. Core Logic
 - **Dynamic Percent Change**: The application must calculate percentage changes dynamically based on user selection (e.g., 1m, 5m, 15m, 1h, 4h, 1d). The visualization should update instantly to reflect the selected volatility timeframe.
+
+- **Market Intelligence Proxy**:
+  - Direct browser calls to Binance Futures API are FORBIDDEN due to CORS.
+  - MUST use `/api/binance/metrics`.
+  - **Period Validation**: This API only accepts `5m, 15m, 30m, 1h, 2h, 4h, 6h, 12h, 1d`. All other timeframes (e.g., 1m, 3d, 1w) MUST be mapped to the nearest valid period server-side.
+
 - **On-Demand Data Pattern (NEW)**: Detailed fundamental data (FDV, Unlocks, Tags) is NOT streamed. It is fetched asynchronously via `SWR` only when a user selects an orb (Lazy Loading).
 
 ## 2. Visual Language
@@ -25,6 +31,22 @@
   - **Ecosystem**: Teal (`#14B8A6`)
   - **Community**: Green (`#22C55E`)
   - **Treasury**: Blue (`#3B82F6`)
+
+- **Metric Color Coding (Market Intelligence)**:
+  - **Open Interest**: Purple (`#a855f7`) - Represents market depth/heat.
+  - **Global Long/Short**: Teal (`#14b8a6`) - Matches the "Gainers" logic.
+  - **Top Traders (Accounts)**: Blue (`#3b82f6`) - Institutional view.
+  - **Top Traders (Positions)**: Orange (`#f97316`) - Smart money view.
+  - **Taker Buy/Sell**: Green (`#22c55e`) - Aggressive flow.
+
+- **Wide Cockpit Layout (DetailDrawer)**:
+  - **Width Constraints**: Max width extends to `1400px` (or `90vw`).
+  - **Grid Discipline**: All Grid Items containing Charts MUST have `min-w-0` and `overflow-hidden` to prevent Canvas blow-out.
+  - **Hierarchy**:
+    1. Header (Symbol/Price)
+    2. Price Chart (Main Context)
+    3. Market Intelligence Grid (OI = Full Width, Ratios = 2 Columns)
+
 
 ## 3. Data Structure
 The application will strictly adhere to the following TypeScript interface for market data:
@@ -62,6 +84,29 @@ interface TokenMetadata {
   tags: string[];
   chains: string[];
 }
+
+// Market Intelligence Metrics
+type MetricType = 'openInterest' | 'topLongShortAccounts' | 'topLongShortPositions' | 'globalLongShort' | 'takerBuySell';
+
+interface MetricDataPoint {
+  timestamp: number;
+  value: number; // Normalized value (e.g., Ratio or OI in USD)
+}
+
+// API Response Structures
+interface OpenInterestData {
+  symbol: string;
+  sumOpenInterest: string;      // Contracts
+  sumOpenInterestValue: string; // USD Value
+  timestamp: number;
+}
+
+interface LongShortRatioData {
+  symbol: string;
+  longShortRatio: string;
+  timestamp: number;
+}
+
 ```
 
 ## 4. Architecture Standards

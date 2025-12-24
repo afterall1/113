@@ -89,3 +89,13 @@
 - **CSS Fixes**: `min-w-0 overflow-hidden` on grid items to prevent canvas overflow.
 - **Documentation**: Complete prompt set in `updates/2024-12-24_market-intelligence-system/`.
 - **Status**: Production Ready.
+
+### [Sprint Lima: Market Intelligence System]
+- **Date**: 2024-12-24
+- **Feature Added**: Full Derivatives Data Integration.
+- **Backend**: Created `/api/binance/metrics` proxy with server-side caching (60s).
+- **Frontend**: Implemented `MetricChart` component with `lightweight-charts` v5.
+- **UI Overhaul**: Expanded `DetailDrawer` to `max-w-[1400px]` (Wide Cockpit).
+- **CSS Logic**: Enforced `min-w-0` on all Grid items to prevent Canvas overflow.
+- **Visuals**: Added specific color coding for OI (Purple), Global Ratio (Teal), Top Traders (Blue/Orange).
+- **Status**: Production Ready.

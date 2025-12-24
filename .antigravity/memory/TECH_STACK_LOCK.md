@@ -22,3 +22,9 @@ This document locks the core technology versions for the Liquidity Nebula projec
 - **Constraint**:
   - High Frequency (>1Hz) -> WebSocket + Mutable Ref.
   - Low Frequency (User Interaction) -> SWR + React State.
+
+## Charts
+- **lightweight-charts**: v5.0+ (Latest Stable)
+  - **Constraint**: MUST use `addSeries(LineSeries, options)` syntax.
+  - **Deprecated**: DO NOT use `addLineSeries()` (v4 syntax).
+  - **Performance**: Charts inside Grids must use `ResizeObserver` with `min-w-0` CSS parent.
