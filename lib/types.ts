@@ -73,3 +73,43 @@ export interface TradeOrder {
   leverage: number;
   margin: number;
 }
+
+// --- BINANCE FUTURES METRICS TYPES ---
+
+export type MetricType =
+  | 'openInterest'
+  | 'topLongShortAccounts'
+  | 'topLongShortPositions'
+  | 'globalLongShort'
+  | 'takerBuySell'
+  | 'basis';
+
+// Open Interest History Data Point
+export interface OpenInterestData {
+  symbol: string;
+  sumOpenInterest: string;      // Total OI in contracts
+  sumOpenInterestValue: string; // Total OI in USD
+  timestamp: number;            // Unix timestamp (ms)
+}
+
+// Long/Short Ratio Data Point (Accounts, Positions, Global)
+export interface LongShortRatioData {
+  symbol: string;
+  longShortRatio: string;       // Ratio value (e.g., "1.5")
+  longAccount?: string;         // Long account percentage
+  shortAccount?: string;        // Short account percentage
+  longPosition?: string;        // Long position percentage
+  shortPosition?: string;       // Short position percentage
+  timestamp: number;            // Unix timestamp (ms)
+}
+
+// Taker Buy/Sell Volume Ratio
+export interface TakerBuySellData {
+  buySellRatio: string;
+  buyVol: string;
+  sellVol: string;
+  timestamp: number;
+}
+
+// Generic union for all metric responses
+export type MetricDataPoint = OpenInterestData | LongShortRatioData | TakerBuySellData;

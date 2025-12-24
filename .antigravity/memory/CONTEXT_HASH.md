@@ -1,6 +1,6 @@
 # CONTEXT HASH
-> **Hash**: `MVP-V1.2-HOLODECK`
-> **Timestamp**: 2025-12-23 (Late Session)
+> **Hash**: `MVP-V1.4-MARKET-INTELLIGENCE`
+> **Timestamp**: 2024-12-24 (Late Session)
 > **Status**: STABLE
 
 ## MVP Features
@@ -9,6 +9,7 @@
 - [x] **Squadron Protocol**: Watchlist & Favorites logic.
 - [x] **Holographic HUD**: Centralized Detail Window ("Aerogel" Glass).
 - [x] **Chart Infrastructure**: MiniChart with Proxy & Premium UI.
+- [x] **Market Intelligence**: Derivatives metrics (OI, L/S Ratios) with MetricChart.
 
 
 ## Next Phase
@@ -72,4 +73,19 @@
 - **Date**: 2025-12-23
 - **Blend Mode**: Added `blendMode = 'add'` for nebula glow when orbs overlap.
 - **Alpha**: Set base alpha to 0.9 for smoother blending.
+- **Status**: Production Ready.
+
+### [Sprint Lima: Market Intelligence System]
+- **Date**: 2024-12-24
+- **Feature Added**: Derivatives metrics visualization in DetailDrawer.
+- **New Files**:
+  - `app/api/binance/metrics/route.ts` (Backend proxy with period mapping)
+  - `components/MetricChart.tsx` (Histogram/Line charts for OI, L/S ratios)
+- **Type Additions**: `MetricType`, `OpenInterestData`, `LongShortRatioData`, `TakerBuySellData` in `lib/types.ts`.
+- **DetailDrawer Changes**:
+  - Expanded to `max-w-[1400px]`
+  - Added "MARKET INTELLIGENCE" section with gradient header
+  - 5 MetricCharts: OI (full width), Global L/S, Taker B/S, Top Accounts, Top Positions
+- **CSS Fixes**: `min-w-0 overflow-hidden` on grid items to prevent canvas overflow.
+- **Documentation**: Complete prompt set in `updates/2024-12-24_market-intelligence-system/`.
 - **Status**: Production Ready.

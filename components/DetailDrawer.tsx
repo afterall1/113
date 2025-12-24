@@ -5,7 +5,8 @@ import { useEffect, useState } from "react";
 import useSWR from 'swr';
 import { fetchTokenMetadata } from '@/lib/services/tokenMetadata';
 import { MiniChart } from '@/components/MiniChart';
-import { TokenMetadata, UnlockAllocation } from '@/lib/types';
+import { MetricChart } from '@/components/MetricChart';
+import { TokenMetadata, UnlockAllocation, MetricType } from '@/lib/types';
 import {
     formatCurrency,
     formatSupply,
@@ -179,10 +180,10 @@ export default function DetailDrawer() {
             {/* Obsidian Monolith Window */}
             <div
                 className={`
-                    relative w-full max-w-4xl obsidian-panel holo-scan
+                    relative w-full max-w-[1400px] obsidian-panel holo-scan
                     flex flex-col overflow-hidden
                     transition-all duration-500 ease-out
-                    absolute bottom-0 h-[85vh] rounded-t-3xl sm:static sm:h-auto sm:max-h-[90vh] sm:rounded-3xl
+                    absolute bottom-0 h-[90vh] rounded-t-3xl sm:static sm:h-auto sm:max-h-[92vh] sm:rounded-3xl
                     ${isVisible ? 'translate-y-0 scale-100 opacity-100' : 'translate-y-12 scale-95 opacity-0'}
                 `}
             >
@@ -333,7 +334,82 @@ export default function DetailDrawer() {
                             </div>
                         </div>
 
-                        {/* 2. Key Metrics (4-Column Grid) */}
+                        {/* 2. Market Intelligence Section */}
+                        <div className="-mx-6 sm:-mx-10 px-6 sm:px-10 py-8 border-t border-b border-white/5 bg-gradient-to-b from-black/40 to-transparent">
+                            {/* Section Header */}
+                            <div className="flex items-center justify-between mb-8">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-2 h-2 rounded-full bg-purple-500 shadow-[0_0_12px_rgba(168,85,247,0.6)] animate-pulse" />
+                                    <h3 className="text-lg font-black tracking-wide">
+                                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-teal-400 to-blue-400">
+                                            MARKET INTELLIGENCE
+                                        </span>
+                                    </h3>
+                                </div>
+                                <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10">
+                                    <div className="w-1 h-1 rounded-full bg-teal-500" />
+                                    <span className="text-[10px] font-mono font-bold text-zinc-400 tracking-widest">
+                                        {chartInterval.toUpperCase()} PERIOD
+                                    </span>
+                                </div>
+                            </div>
+
+                            {selectedTicker && (
+                                <div className="space-y-6 w-full overflow-hidden">
+                                    {/* Open Interest - Full Width (Primary) */}
+                                    <div className="w-full min-w-0 overflow-hidden">
+                                        <MetricChart
+                                            symbol={selectedTicker.symbol}
+                                            metric="openInterest"
+                                            period={chartInterval}
+                                            color="#a855f7"
+                                        />
+                                    </div>
+
+                                    {/* Ratio Metrics - 2 Column Grid */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+                                        <div className="min-w-0 overflow-hidden">
+                                            <MetricChart
+                                                symbol={selectedTicker.symbol}
+                                                metric="globalLongShort"
+                                                period={chartInterval}
+                                                color="#14b8a6"
+                                            />
+                                        </div>
+                                        <div className="min-w-0 overflow-hidden">
+                                            <MetricChart
+                                                symbol={selectedTicker.symbol}
+                                                metric="takerBuySell"
+                                                period={chartInterval}
+                                                color="#22c55e"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Top Traders - 2 Column Grid */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+                                        <div className="min-w-0 overflow-hidden">
+                                            <MetricChart
+                                                symbol={selectedTicker.symbol}
+                                                metric="topLongShortAccounts"
+                                                period={chartInterval}
+                                                color="#3b82f6"
+                                            />
+                                        </div>
+                                        <div className="min-w-0 overflow-hidden">
+                                            <MetricChart
+                                                symbol={selectedTicker.symbol}
+                                                metric="topLongShortPositions"
+                                                period={chartInterval}
+                                                color="#f97316"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* 3. Key Metrics (4-Column Grid) */}
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                             {isLoading ? (
                                 <>
