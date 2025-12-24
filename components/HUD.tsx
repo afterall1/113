@@ -27,14 +27,14 @@ export default function HUD() {
     const isGridMode = viewMode === 'GRID';
 
     return (
-        <div className="fixed top-6 left-1/2 -translate-x-1/2 flex items-center gap-4 p-2 rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 shadow-2xl z-20 transition-all hover:bg-black/60">
+        <div className="fixed top-6 left-1/2 -translate-x-1/2 flex items-center gap-4 p-3 rounded-full liquid-metal z-20 transition-all">
 
             {/* Grid View Toggle */}
             <button
                 onClick={toggleViewMode}
-                className={`group relative p-1.5 rounded-lg transition-all duration-300 ${isGridMode
-                        ? 'text-amber-400 bg-amber-500/15 border border-amber-500/40 shadow-[0_0_12px_rgba(245,158,11,0.25)]'
-                        : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5 border border-transparent hover:border-white/10'
+                className={`group relative p-2.5 rounded-full liquid-button transition-all duration-300 ${isGridMode
+                    ? '!bg-gradient-to-r !from-amber-900 !via-amber-800 !to-amber-900 text-amber-300 !border-amber-500/30 shadow-[0_0_15px_rgba(245,158,11,0.3)]'
+                    : ''
                     }`}
                 title={isGridMode ? "Switch to Nebula View" : "Switch to Grid View"}
             >
@@ -43,7 +43,7 @@ export default function HUD() {
                 </svg>
                 {/* Active Glow */}
                 {isGridMode && (
-                    <span className="absolute inset-0 rounded-lg animate-pulse bg-amber-500/10" />
+                    <span className="absolute inset-0 rounded-full animate-pulse bg-amber-500/10" />
                 )}
             </button>
 
@@ -52,7 +52,9 @@ export default function HUD() {
             {/* Sound Toggle */}
             <button
                 onClick={toggleSound}
-                className={`p-1.5 rounded-full transition-all ${!isMuted ? 'text-teal-400 bg-teal-500/10' : 'text-zinc-500 hover:text-zinc-300'}`}
+                className={`p-2.5 rounded-full liquid-button transition-all duration-300 ${!isMuted
+                    ? '!bg-gradient-to-r !from-teal-900 !via-teal-800 !to-teal-900 text-teal-300 !border-teal-500/30 shadow-[0_0_15px_rgba(20,184,166,0.3)]'
+                    : ''}`}
                 title={isMuted ? "Unmute Audio" : "Mute Audio"}
             >
                 {isMuted ? (
@@ -74,7 +76,7 @@ export default function HUD() {
                 <input
                     type="text"
                     placeholder="SEARCH TICKER..."
-                    className="bg-transparent border-b border-white/20 text-white px-2 py-1 outline-none font-mono tracking-widest text-sm focus:border-teal-400 w-32 focus:w-48 transition-all placeholder:text-white/30"
+                    className="bg-white/5 border border-white/10 text-white px-3 py-1.5 rounded-lg outline-none font-mono tracking-widest text-sm focus:border-teal-400/50 focus:bg-white/10 focus:shadow-[0_0_15px_rgba(20,184,166,0.15)] w-32 focus:w-48 transition-all placeholder:text-zinc-500"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value.toUpperCase())}
                 />
@@ -88,9 +90,9 @@ export default function HUD() {
                     <button
                         key={tf}
                         onClick={() => setTimeframe(tf)}
-                        className={`px-3 py-1 rounded-lg text-xs font-bold tracking-wider transition-all ${timeframe === tf
-                            ? 'bg-teal-500/20 text-teal-300 border border-teal-500/50 shadow-[0_0_10px_rgba(20,184,166,0.2)]'
-                            : 'text-white/40 hover:text-white hover:bg-white/5'
+                        className={`px-3 py-1.5 rounded-lg liquid-button text-xs font-bold tracking-wider transition-all duration-300 ${timeframe === tf
+                            ? '!bg-gradient-to-r !from-teal-900 !via-teal-800 !to-teal-900 text-teal-300 !border-teal-500/30 shadow-[0_0_15px_rgba(20,184,166,0.25)]'
+                            : ''
                             }`}
                     >
                         {tf}

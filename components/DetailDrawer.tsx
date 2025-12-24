@@ -53,14 +53,14 @@ function MetricSkeleton() {
     );
 }
 
-// Metric card component
+// Metric card component - Obsidian Cell
 function MetricCard({ label, value, subValue }: { label: string; value: string; subValue?: string }) {
     return (
-        <div className="group p-3 rounded-xl bg-white/5 border border-white/5 hover:border-white/20 transition-all hover:bg-white/[0.08] relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            <p className="text-[10px] text-zinc-500 uppercase tracking-widest mb-1 relative z-10">{label}</p>
-            <p className="text-lg font-mono text-zinc-200 relative z-10">{value}</p>
-            {subValue && <p className="text-xs text-zinc-500 mt-0.5 relative z-10">{subValue}</p>}
+        <div className="group p-4 rounded-xl bg-black/40 border border-white/5 hover:border-white/15 transition-all relative overflow-hidden shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
+            <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <p className="text-[10px] text-zinc-500 uppercase tracking-widest mb-1.5 relative z-10 etched-text">{label}</p>
+            <p className="text-xl font-mono font-bold text-zinc-100 relative z-10 tracking-tight">{value}</p>
+            {subValue && <p className="text-xs text-zinc-500 mt-1 relative z-10">{subValue}</p>}
         </div>
     );
 }
@@ -168,89 +168,91 @@ export default function DetailDrawer() {
     const circulationRatio = metadata ? (metadata.circulatingSupply / (metadata.maxSupply || metadata.circulatingSupply) * 100) : 0;
 
     return (
-        <div className={`fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 transition-all duration-300 ${isVisible ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
+        <div className={`fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-6 transition-all duration-300 ${isVisible ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
 
             {/* Backdrop */}
             <div
-                className="absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity duration-300"
+                className="absolute inset-0 bg-black/80 backdrop-blur-lg transition-opacity duration-300"
                 onClick={close}
             />
 
-            {/* Aerogel Holographic Window */}
+            {/* Obsidian Monolith Window */}
             <div
                 className={`
-                    relative w-full max-w-3xl 
-                    bg-gradient-to-b from-zinc-900/95 to-zinc-950/95 
-                    backdrop-blur-xl border border-white/10 border-t-white/20
-                    shadow-[0_0_50px_rgba(0,0,0,0.5)] 
+                    relative w-full max-w-4xl obsidian-panel holo-scan
                     flex flex-col overflow-hidden
-                    transition-all duration-300 ease-out
-                    absolute bottom-0 h-[80vh] rounded-t-2xl sm:static sm:h-auto sm:max-h-[85vh] sm:rounded-2xl
-                    ${isVisible ? 'translate-y-0 scale-100 opacity-100' : 'translate-y-8 scale-95 opacity-0'}
+                    transition-all duration-500 ease-out
+                    absolute bottom-0 h-[85vh] rounded-t-3xl sm:static sm:h-auto sm:max-h-[90vh] sm:rounded-3xl
+                    ${isVisible ? 'translate-y-0 scale-100 opacity-100' : 'translate-y-12 scale-95 opacity-0'}
                 `}
             >
-                {/* Top Glow Effect */}
-                <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+                {/* Integrated Close Button - Top Right Metallic Capsule */}
+                <button
+                    onClick={close}
+                    className="absolute top-4 right-4 z-50 px-3 py-1.5 rounded-full liquid-button flex items-center gap-2 hover:shadow-[0_0_15px_rgba(255,255,255,0.15)] transition-all duration-300"
+                >
+                    <span className="text-[10px] font-mono font-bold text-zinc-400 tracking-widest">ESC</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
 
-                {/* Scanline Texture (Subtle) */}
-                <div className="absolute inset-0 pointer-events-none bg-[url('/scanline.png')] opacity-[0.03] bg-repeat"
-                    style={{ backgroundSize: '100% 4px' }} />
+                {/* Scrollable Content with Scanner Animation */}
+                <div className="flex-1 overflow-y-auto p-6 sm:p-10 custom-scrollbar relative z-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
 
-                {/* Scrollable Content */}
-                <div className="flex-1 overflow-y-auto p-6 sm:p-8 custom-scrollbar relative z-10">
+                    {/* HEADER SECTION - Split Layout */}
+                    <div className="flex flex-col sm:flex-row justify-between items-start gap-6 mb-8">
 
-                    {/* Header */}
-                    <div className="flex justify-between items-start mb-8">
-                        <div>
-                            <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tighter mb-1 drop-shadow-lg">
-                                {selectedTicker?.symbol?.replace('USDT', '')}
-                                <span className="text-sm text-zinc-500 ml-2 font-mono">/USDT</span>
-                            </h2>
-                            <div className={`text-lg font-mono flex items-center gap-3 ${(selectedTicker?.priceChangePercent || 0) >= 0 ? 'text-teal-400' : 'text-red-500'}`}>
-                                <span className="text-2xl sm:text-3xl font-bold tracking-tight">
-                                    ${selectedTicker?.price?.toFixed(selectedTicker.price < 1 ? 4 : 2)}
-                                </span>
-                                <span className="px-2 py-0.5 rounded-full bg-white/5 text-sm border border-white/5">
-                                    {(selectedTicker?.priceChangePercent || 0) > 0 ? '+' : ''}
-                                    {selectedTicker?.priceChangePercent}%
-                                </span>
-                                {/* Live Indicator */}
-                                <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-green-500/10 border border-green-500/20">
-                                    <span className="relative flex h-2 w-2">
-                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                                    </span>
-                                    <span className="text-[9px] font-bold text-green-400 tracking-wider">LIVE</span>
+                        {/* Left: Symbol & Meta */}
+                        <div className="flex items-center gap-4">
+                            {/* Favorite Button */}
+                            <button
+                                onClick={() => selectedTicker && toggleFavorite(selectedTicker.symbol)}
+                                className={`p-3 rounded-2xl liquid-button transition-all duration-300 ${favorites.includes(selectedTicker?.symbol || '')
+                                    ? '!bg-gradient-to-r !from-amber-900 !via-amber-800 !to-amber-900 text-amber-300 !border-amber-500/30 shadow-[0_0_25px_rgba(245,158,11,0.35)]'
+                                    : ''
+                                    }`}
+                                title="Toggle Favorite"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill={favorites.includes(selectedTicker?.symbol || '') ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                                </svg>
+                            </button>
+
+                            <div>
+                                <h2 className="text-4xl sm:text-5xl font-black text-white tracking-tighter etched-text mb-1">
+                                    {selectedTicker?.symbol?.replace('USDT', '')}
+                                </h2>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-sm text-zinc-500 font-mono tracking-wider">/USDT PERPETUAL</span>
+                                    {/* Live Indicator */}
+                                    <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-green-500/10 border border-green-500/20">
+                                        <span className="relative flex h-1.5 w-1.5">
+                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500"></span>
+                                        </span>
+                                        <span className="text-[8px] font-bold text-green-400 tracking-widest">LIVE</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-2">
-                            {/* Favorite Button */}
-                            <button
-                                onClick={() => selectedTicker && toggleFavorite(selectedTicker.symbol)}
-                                className={`p-2 rounded-full transition-all border border-transparent ${favorites.includes(selectedTicker?.symbol || '')
-                                    ? 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20 hover:bg-yellow-400/20 shadow-[0_0_10px_rgba(250,204,21,0.2)]'
-                                    : 'text-zinc-600 hover:text-white hover:bg-white/10 hover:border-white/10'
-                                    }`}
-                                title="Toggle Favorite"
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill={favorites.includes(selectedTicker?.symbol || '') ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-                                </svg>
-                            </button>
-
-                            {/* Close Button */}
-                            <button
-                                onClick={close}
-                                className="p-2 rounded-full hover:bg-white/10 text-white/50 hover:text-white transition-colors border border-transparent hover:border-white/10"
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
+                        {/* Right: Massive Price Display */}
+                        <div className="text-right">
+                            <div className={`text-5xl sm:text-6xl font-black tracking-tighter ${(selectedTicker?.priceChangePercent || 0) >= 0 ? 'text-teal-400' : 'text-red-400'}`}>
+                                ${selectedTicker?.price?.toFixed(selectedTicker.price < 1 ? 4 : 2)}
+                            </div>
+                            <div className={`flex items-center justify-end gap-2 mt-1 text-lg font-mono font-bold ${(selectedTicker?.priceChangePercent || 0) >= 0 ? 'text-teal-400' : 'text-red-400'}`}>
+                                <span className={`px-3 py-1 rounded-lg border ${(selectedTicker?.priceChangePercent || 0) >= 0 ? 'bg-teal-500/10 border-teal-500/20' : 'bg-red-500/10 border-red-500/20'}`}>
+                                    {(selectedTicker?.priceChangePercent || 0) > 0 ? '+' : ''}
+                                    {selectedTicker?.priceChangePercent?.toFixed(2)}%
+                                </span>
+                            </div>
                         </div>
                     </div>
+
+                    {/* Etched Divider */}
+                    <div className="etched-divider mb-8" />
 
                     {/* Description */}
                     {isLoading ? (
@@ -259,7 +261,7 @@ export default function DetailDrawer() {
                             <div className="h-4 w-3/4 bg-white/10 rounded" />
                         </div>
                     ) : metadata?.description && (
-                        <p className="text-sm text-zinc-400 mb-8 leading-relaxed max-w-2xl">
+                        <p className="text-sm text-zinc-300 mb-8 leading-relaxed max-w-2xl">
                             {metadata.description}
                         </p>
                     )}
@@ -284,8 +286,8 @@ export default function DetailDrawer() {
                     {/* Main Content Stack */}
                     <div className="flex flex-col gap-6 mb-8">
 
-                        {/* 1. Chart Section (Full Width Prominent) */}
-                        <div className="rounded-xl border border-white/5 bg-black/40 overflow-hidden relative group h-[320px] shadow-inner shadow-black/50">
+                        {/* 1. Chart Section (Full Bleed - No Border) */}
+                        <div className="-mx-6 sm:-mx-10 rounded-none bg-black/30 overflow-hidden relative group h-[350px]">
                             {/* Header Row */}
                             <div className="absolute top-0 left-0 w-full p-3 flex justify-between items-start z-10 pointer-events-none">
                                 {/* Title (Left) */}
@@ -442,10 +444,10 @@ export default function DetailDrawer() {
                 </div>
 
                 {/* Footer (Fixed at bottom of window) */}
-                <div className="p-6 border-t border-white/5 bg-white/[0.02] flex justify-end relative z-10">
+                <div className="p-6 border-t border-white/10 bg-white/[0.03] backdrop-blur-sm flex justify-end relative z-10">
                     <button
                         onClick={() => setIsTerminalOpen(true)}
-                        className="w-full sm:w-auto px-8 py-3 bg-teal-500 hover:bg-teal-400 text-black font-bold tracking-widest rounded-lg transition-all shadow-[0_0_20px_rgba(20,184,166,0.3)] hover:shadow-[0_0_35px_rgba(20,184,166,0.6)] group"
+                        className="w-full sm:w-auto px-8 py-3.5 bg-teal-500 hover:bg-teal-400 text-black font-bold tracking-widest rounded-xl transition-all duration-300 shadow-[0_0_25px_rgba(20,184,166,0.35)] hover:shadow-[0_0_40px_rgba(20,184,166,0.65)] group"
                     >
                         <span className="group-hover:tracking-[0.2em] transition-all duration-300">OPEN TERMINAL</span>
                     </button>

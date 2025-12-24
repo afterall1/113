@@ -35,7 +35,7 @@ export default function WatchlistPanel() {
 
     return (
         <div
-            className={`fixed top-0 left-0 h-full z-30 transition-all duration-300 ease-in-out ${isCollapsed ? 'w-12 bg-transparent pointer-events-none' : 'w-72 bg-black/60 backdrop-blur-md border-r border-white/10 shadow-2xl pointer-events-auto'
+            className={`fixed top-0 left-0 h-full z-30 transition-all duration-300 ease-in-out ${isCollapsed ? 'w-12 bg-transparent pointer-events-none' : 'w-72 liquid-metal !rounded-none !rounded-r-2xl pointer-events-auto'
                 }`}
         >
             {/* Toggle Button */}
@@ -124,7 +124,7 @@ export default function WatchlistPanel() {
                         return (
                             <div
                                 key={symbol}
-                                className="group flex items-center justify-between p-3 rounded-lg hover:bg-white/5 transition-colors cursor-pointer border border-transparent hover:border-white/5"
+                                className="group flex items-center justify-between p-3 rounded-xl hover:bg-white/10 transition-all cursor-pointer border border-transparent hover:border-white/10 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]"
                                 onClick={() => data && setSelectedTicker(data)}
                             >
                                 <div>

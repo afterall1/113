@@ -163,9 +163,9 @@ export function CoinSelector({ isOpen, onClose, onSelect }: CoinSelectorProps) {
             className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
             onClick={(e) => e.target === e.currentTarget && onClose()}
         >
-            {/* Modal Container */}
+            {/* Modal Container - Liquid Metal */}
             <div
-                className="relative bg-zinc-950 w-full max-w-lg max-h-[80vh] flex flex-col shadow-2xl border border-white/10 rounded-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200"
+                className="relative liquid-metal w-full max-w-lg max-h-[80vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200"
                 onKeyDown={handleKeyDown}
             >
                 {/* Section 1: Search Input */}
@@ -219,9 +219,9 @@ export function CoinSelector({ isOpen, onClose, onSelect }: CoinSelectorProps) {
                                 <button
                                     key={chip.mode}
                                     onClick={() => handleFilterClick(chip.mode)}
-                                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-mono font-medium whitespace-nowrap transition-all duration-200 border flex-shrink-0 ${isActive
-                                        ? chip.activeClass
-                                        : 'bg-zinc-800/50 text-zinc-400 border-transparent hover:bg-zinc-800 hover:text-zinc-300'
+                                    className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-mono font-medium whitespace-nowrap transition-all duration-300 border flex-shrink-0 ${isActive
+                                        ? `liquid-button bg-gradient-to-r from-teal-900 via-teal-800 to-teal-900 text-teal-200 border-teal-500/30 shadow-[0_0_15px_rgba(20,184,166,0.3)]`
+                                        : 'liquid-button'
                                         }`}
                                 >
                                     <span>{chip.icon}</span>

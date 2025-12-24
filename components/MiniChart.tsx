@@ -40,7 +40,7 @@ export function MiniChart({ symbol, color = '#22c55e', interval = '15m', classNa
             },
             grid: {
                 vertLines: { visible: false },
-                horzLines: { color: '#334155', style: 0, visible: true }, // Visible grid lines helps read price
+                horzLines: { color: 'rgba(255,255,255,0.02)', style: 0, visible: true }, // Ultra-faint grid
             },
             width: chartContainerRef.current.clientWidth,
             height: chartContainerRef.current.clientHeight,
@@ -153,15 +153,8 @@ export function MiniChart({ symbol, color = '#22c55e', interval = '15m', classNa
             {/* Chart Container */}
             <div ref={chartContainerRef} className="w-full h-full" />
 
-            {/* Overlay Gradient for seamless integration? Optional, but nice for Nebula feel */}
-            <div className="absolute inset-0 pointer-events-none shadow-[inset_0_0_20px_rgba(0,0,0,0.5)]" />
-
-            {/* DEBUG: Data Count Indicator */}
-            {candleData && (
-                <div className="absolute bottom-1 left-1 text-[9px] text-slate-600 font-mono z-20">
-                    DATA: {candleData.length} M
-                </div>
-            )}
+            {/* Overlay Gradient for seamless bleed integration */}
+            <div className="absolute inset-0 pointer-events-none shadow-[inset_0_0_30px_rgba(0,0,0,0.6)]" />
         </div>
     );
 }

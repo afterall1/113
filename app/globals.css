@@ -27,7 +27,440 @@ body {
 
 /* TargetingSystem scan line animation */
 @keyframes scan {
-  0% { transform: translateY(-100%); opacity: 0; }
-  50% { opacity: 1; }
-  100% { transform: translateY(100%); opacity: 0; }
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+/* ============================================
+   AEROGEL GLASS AESTHETIC - Dark Sci-Fi System
+   ============================================ */
+
+/* Primary Aerogel Glass Effect */
+.aerogel-glass {
+  background: rgba(10, 10, 10, 0.6);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 4px 30px rgba(0, 0, 0, 0.5),
+    inset 0 0 20px rgba(255, 255, 255, 0.02);
+  transition: all 0.3s ease;
+}
+
+.aerogel-glass:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow:
+    0 8px 40px rgba(0, 0, 0, 0.6),
+    inset 0 0 25px rgba(255, 255, 255, 0.03);
+}
+
+/* Lighter variant for nested elements */
+.aerogel-glass-light {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.01);
+}
+
+/* Glow button effects */
+.glow-teal:hover {
+  box-shadow: 0 0 20px rgba(20, 184, 166, 0.4);
+}
+
+.glow-amber:hover {
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
+}
+
+/* Top edge highlight for panels */
+.top-glow::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+}
+
+/* Hide scrollbar utility */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Custom scrollbar for aerogel panels */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ============================================
+   LIQUID METAL DESIGN SYSTEM - Dark Chrome/Mercury
+   ============================================ */
+
+/* Liquid flow animation for metallic gradients */
+@keyframes liquid-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@layer components {
+
+  /* ----------------------------------------
+     AEROGEL - Frosted Glass (Legacy Support)
+     ---------------------------------------- */
+  .aerogel {
+    @apply bg-zinc-950/40 backdrop-blur-xl border border-white/5 shadow-2xl;
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.03),
+      0 20px 40px -20px rgba(0, 0, 0, 0.7);
+  }
+
+  .aerogel-interactive {
+    @apply bg-zinc-950/40 backdrop-blur-xl border border-white/5 shadow-2xl transition-all duration-300;
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.03),
+      0 20px 40px -20px rgba(0, 0, 0, 0.7);
+  }
+
+  .aerogel-interactive:hover {
+    @apply bg-zinc-900/60 border-white/10;
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.05),
+      0 0 20px rgba(20, 184, 166, 0.1);
+  }
+
+  /* ----------------------------------------
+     LIQUID METAL - Chrome/Mercury Material
+     ---------------------------------------- */
+  .liquid-metal {
+    @apply bg-zinc-950/60 backdrop-blur-2xl border border-white/10 rounded-3xl;
+    box-shadow:
+      inset 0 1px 1px rgba(255, 255, 255, 0.15),
+      /* Top edge highlight */
+      inset 0 -1px 1px rgba(0, 0, 0, 0.5),
+      /* Bottom edge shadow */
+      0 10px 30px -10px rgba(0, 0, 0, 0.8);
+    /* Depth shadow */
+  }
+
+  .liquid-metal-light {
+    @apply bg-zinc-900/40 backdrop-blur-xl border border-white/5 rounded-2xl;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      0 5px 15px -5px rgba(0, 0, 0, 0.5);
+  }
+
+  /* ----------------------------------------
+     LIQUID BUTTON - Mercury Droplet Effect
+     ---------------------------------------- */
+  .liquid-button {
+    /* Metallic Gradient: Dark Silver */
+    background: linear-gradient(110deg, #18181b 10%, #27272a 40%, #52525b 50%, #27272a 60%, #18181b 90%);
+    background-size: 200% 100%;
+    @apply text-zinc-100 font-medium rounded-xl border border-white/5 transition-all duration-500 ease-out;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      0 4px 6px -1px rgba(0, 0, 0, 0.5);
+  }
+
+  .liquid-button:hover {
+    background-position: 100% 0;
+    /* Light flow effect */
+    @apply border-white/10;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.2),
+      0 0 15px rgba(255, 255, 255, 0.1);
+    transform: translateY(-1px);
+  }
+
+  .liquid-button:active {
+    transform: translateY(1px) scale(0.98);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.05),
+      0 2px 4px rgba(0, 0, 0, 0.5);
+  }
+
+  /* Primary variant - Teal accent */
+  .liquid-button-primary {
+    background: linear-gradient(110deg, #0d4a47 10%, #0f766e 40%, #14b8a6 50%, #0f766e 60%, #0d4a47 90%);
+    background-size: 200% 100%;
+    @apply text-white font-bold rounded-xl border border-teal-400/20 transition-all duration-500 ease-out;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.15),
+      0 0 20px rgba(20, 184, 166, 0.3);
+  }
+
+  .liquid-button-primary:hover {
+    background-position: 100% 0;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.25),
+      0 0 30px rgba(20, 184, 166, 0.5);
+    transform: translateY(-1px);
+  }
+}
+
+/* ============================================
+   OBSIDIAN MONOLIT DESIGN SYSTEM
+   ============================================ */
+
+/* Border flow animation - rotating metallic light */
+@keyframes border-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Holographic scan line effect */
+@keyframes scan-line {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+
+  100% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+/* Obsidian Panel - Dark monolith with flowing border */
+.obsidian-panel {
+  position: relative;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(40px) saturate(120%);
+  -webkit-backdrop-filter: blur(40px) saturate(120%);
+  border-radius: 1.5rem;
+  overflow: hidden;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.8),
+    0 25px 50px -12px rgba(0, 0, 0, 0.9);
+}
+
+/* Flowing metal border effect */
+.obsidian-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(90deg,
+      rgba(255, 255, 255, 0.03) 0%,
+      rgba(255, 255, 255, 0.15) 25%,
+      rgba(20, 184, 166, 0.2) 50%,
+      rgba(255, 255, 255, 0.15) 75%,
+      rgba(255, 255, 255, 0.03) 100%);
+  background-size: 300% 100%;
+  animation: border-flow 8s linear infinite;
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Inner glow effect */
+.obsidian-panel::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+}
+
+/* Etched text - metal-engraved typography */
+.etched-text {
+  color: rgba(255, 255, 255, 0.7);
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.1),
+    0 -1px 0 rgba(0, 0, 0, 0.8);
+}
+
+/* Holographic scan container */
+.holo-scan {
+  position: relative;
+  overflow: hidden;
+}
+
+.holo-scan::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom,
+      transparent 0%,
+      rgba(20, 184, 166, 0.1) 50%,
+      transparent 100%);
+  height: 50%;
+  animation: scan-line 4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* Etched divider line */
+.etched-divider {
+  height: 1px;
+  background: linear-gradient(to right,
+      transparent,
+      rgba(255, 255, 255, 0.1) 20%,
+      rgba(255, 255, 255, 0.15) 50%,
+      rgba(255, 255, 255, 0.1) 80%,
+      transparent);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.5);
+}
+
+/* ============================================
+   NEURAL GRID DESIGN SYSTEM - Spatial UI 2025
+   ============================================ */
+
+/* Neural pulse animation - awaiting data effect */
+@keyframes neural-pulse {
+
+  0%,
+  100% {
+    border-color: rgba(255, 255, 255, 0.05);
+    box-shadow: 0 0 0 rgba(20, 184, 166, 0);
+  }
+
+  50% {
+    border-color: rgba(20, 184, 166, 0.3);
+    box-shadow: 0 0 15px rgba(20, 184, 166, 0.1);
+  }
+}
+
+/* Holographic shimmer effect */
+@keyframes holo-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Neural Slot - Grid cell base */
+.neural-slot {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(9, 9, 11, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: all 0.3s ease;
+}
+
+.neural-slot.empty {
+  animation: neural-pulse 4s infinite ease-in-out;
+}
+
+.neural-slot:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+}
+
+/* Holographic Card - Active data card */
+.holo-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.05) 0%, transparent 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* Holographic shine effect */
+.holo-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg,
+      transparent 40%,
+      rgba(255, 255, 255, 0.05) 45%,
+      rgba(255, 255, 255, 0.1) 50%,
+      rgba(255, 255, 255, 0.05) 55%,
+      transparent 60%);
+  background-size: 200% 100%;
+  animation: holo-shimmer 8s infinite linear;
+  pointer-events: none;
+}
+
+.holo-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.5),
+    0 0 20px rgba(20, 184, 166, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Neural Grid Background - Blueprint pattern */
+.neural-grid-bg {
+  background-image: radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.05) 1px, transparent 0);
+  background-size: 20px 20px;
+}
+
+/* Neural Grid Background (Larger dots) */
+.neural-grid-bg-lg {
+  background-image: radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.03) 1px, transparent 0);
+  background-size: 40px 40px;
 }

@@ -3,8 +3,8 @@ import { TickerData } from './types';
 
 // High-DPI Texture Scale Correction
 // Texture increased from 128px to 512px (4x) for Retina sharpness
-// Apply 0.25 multiplier to maintain original visual size
-const TEXTURE_SCALE_CORRECTION = 0.25;
+// Reduced by 10% for new Rim Light glass texture (visual edge is larger now)
+const TEXTURE_SCALE_CORRECTION = 0.22;
 
 export class CoinOrb {
     public sprite: PIXI.Sprite;
@@ -52,9 +52,10 @@ export class CoinOrb {
         // Color tint based on initial gain/loss
         this.updateBaseTint();
 
-        // Blend mode: Switched to 'normal' for maximum sharpness (removes hazy glow)
-        this.sprite.blendMode = 'normal';
-        this.sprite.alpha = 0.9; // Slightly transparent for better blending
+        // Blend mode: 'add' for luminous glow against dark space background
+        // Glass texture benefits from additive blending for rim light pop
+        this.sprite.blendMode = 'add';
+        this.sprite.alpha = 0.85; // Semi-transparent for glass effect, stars slightly visible through core
 
         // Interactive setup
         this.sprite.eventMode = 'static';
@@ -98,10 +99,10 @@ export class CoinOrb {
 
     private updateBaseTint(percent: number = this.data.priceChangePercent) {
         if (this.isFavorite) {
-            // GOLD for Favorites
+            // GOLD for Favorites - Slightly brighter
             this.sprite.tint = 0xFFD700;
             this.sprite.zIndex = 50; // Above normal (1), below hover (100)
-            this.sprite.alpha = 1.0;
+            this.sprite.alpha = 0.95;
         } else if (percent >= 0) {
             // Gainers: Green/Teal
             this.sprite.tint = 0x00ffcc;
@@ -129,7 +130,7 @@ export class CoinOrb {
             this.sprite.alpha = 0.1;
             this.sprite.zIndex = 0;
         } else {
-            this.sprite.alpha = 1.0;
+            this.sprite.alpha = 0.85; // Glass transparency
             this.sprite.zIndex = 1;
         }
     }
@@ -158,14 +159,22 @@ export class CoinOrb {
         this.labelContainer = new PIXI.Container();
         this.labelContainer.zIndex = 200; // Always on top
 
-        // Create glowing ring
+        // Create glowing reticle ring - Neon Cyan for maximum visibility
         this.hoverRing = new PIXI.Graphics();
-        const ringRadius = this.getRadius() + 4;
+        const ringRadius = this.getRadius() + 6;
+
+        // Inner ring - bright core
         this.hoverRing.circle(0, 0, ringRadius);
-        this.hoverRing.stroke({ width: 2, color: 0x00ffff, alpha: 0.8 });
-        // Outer glow
+        this.hoverRing.stroke({ width: 2.5, color: 0x06b6d4, alpha: 1.0 }); // Cyan core
+
+        // Middle glow ring
         this.hoverRing.circle(0, 0, ringRadius + 4);
-        this.hoverRing.stroke({ width: 1, color: 0x00ffff, alpha: 0.3 });
+        this.hoverRing.stroke({ width: 1.5, color: 0x06b6d4, alpha: 0.5 });
+
+        // Outer diffuse glow
+        this.hoverRing.circle(0, 0, ringRadius + 8);
+        this.hoverRing.stroke({ width: 1, color: 0x06b6d4, alpha: 0.2 });
+
         this.labelContainer.addChild(this.hoverRing);
 
         // Create floating label
