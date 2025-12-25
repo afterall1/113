@@ -254,50 +254,43 @@ function generateGenericMetadata(symbol: string): TokenMetadata {
 
 /**
  * Fetch token metadata for a given symbol
- * Currently returns mock data - will be replaced with real API calls later
+ * Uses CoinGecko API proxy with fallback to generated data
  * 
  * @param symbol - Trading pair symbol (e.g., "BTCUSDT", "ETHUSDT")
  * @returns Promise<TokenMetadata> - Token fundamental data
  */
 export async function fetchTokenMetadata(symbol: string): Promise<TokenMetadata> {
-    // Simulate network delay (100-300ms)
-    await new Promise(resolve => setTimeout(resolve, 100 + Math.random() * 200));
+    try {
+        // Call the CoinGecko proxy API
+        const response = await fetch(`/api/token/metadata?symbol=${encodeURIComponent(symbol)}`);
 
-    // Extract base token from trading pair
-    const baseSymbol = symbol.replace('USDT', '').replace('BUSD', '').replace('USDC', '');
+        if (!response.ok) {
+            console.warn(`[TokenMetadata] API returned ${response.status} for ${symbol}, using fallback`);
+            return generateGenericMetadata(symbol);
+        }
 
-    // Check if we have mock data for this token
-    const mockData = MOCK_TOKEN_DATA[baseSymbol];
+        const data = await response.json();
 
-    if (mockData) {
-        const { unlockDays, unlockPercent, ...metadata } = mockData;
+        // Check if response contains error
+        if (data.error) {
+            console.warn(`[TokenMetadata] API error for ${symbol}: ${data.error}, using fallback`);
+            return generateGenericMetadata(symbol);
+        }
 
-        // Calculate next unlock based on mock data
-        // Generate deterministic seed from symbol
-        const symbolSeed = baseSymbol.charCodeAt(0) + (baseSymbol.charCodeAt(1) || 0);
+        // Validate essential fields exist
+        if (!data.marketCap && !data.fdv) {
+            console.warn(`[TokenMetadata] Empty data for ${symbol}, using fallback`);
+            return generateGenericMetadata(symbol);
+        }
 
-        const nextUnlock: TokenUnlock = unlockDays > 0 ? {
-            date: getFutureDate(unlockDays),
-            amount: metadata.circulatingSupply * (unlockPercent / 100),
-            valueUSD: metadata.marketCap * (unlockPercent / 100),
-            percentOfSupply: unlockPercent,
-            allocations: generateAllocations(symbolSeed),
-        } : {
-            date: '',
-            amount: 0,
-            valueUSD: 0,
-            percentOfSupply: 0,
-            allocations: [],
-        };
+        // Return the API response (already matches TokenMetadata interface)
+        return data as TokenMetadata;
 
-        return {
-            ...metadata,
-            nextUnlock,
-        };
+    } catch (error) {
+        console.error(`[TokenMetadata] Failed to fetch ${symbol}:`, error);
+        // Graceful fallback to generated data
+        return generateGenericMetadata(symbol);
     }
-
-    // Return generic data for unknown tokens
-    return generateGenericMetadata(symbol);
 }
 
 /**
