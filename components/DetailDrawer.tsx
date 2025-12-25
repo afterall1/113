@@ -6,7 +6,7 @@ import useSWR from 'swr';
 import { fetchTokenMetadata } from '@/lib/services/tokenMetadata';
 import { MiniChart } from '@/components/MiniChart';
 import { MetricChart } from '@/components/MetricChart';
-import { TokenMetadata, UnlockAllocation, MetricType } from '@/lib/types';
+import { TokenMetadata, UnlockAllocation, MetricType, MarketType } from '@/lib/types';
 import {
     formatCurrency,
     formatSupply,
@@ -135,6 +135,7 @@ export default function DetailDrawer() {
     const [isVisible, setIsVisible] = useState(false);
     const [isTerminalOpen, setIsTerminalOpen] = useState(false);
     const [chartInterval, setChartInterval] = useState('15m');
+    const [marketDataType, setMarketDataType] = useState<MarketType>('futures');
     const intervals = ['1m', '3m', '15m', '30m', '1h', '2h', '4h', '8h', '12h', '1d', '3d', '1w', '1M'];
 
     // SWR for fetching token metadata
@@ -337,7 +338,7 @@ export default function DetailDrawer() {
                         {/* 2. Market Intelligence Section */}
                         <div className="-mx-6 sm:-mx-10 px-6 sm:px-10 py-8 border-t border-b border-white/5 bg-gradient-to-b from-black/40 to-transparent">
                             {/* Section Header */}
-                            <div className="flex items-center justify-between mb-8">
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
                                 <div className="flex items-center gap-3">
                                     <div className="w-2 h-2 rounded-full bg-purple-500 shadow-[0_0_12px_rgba(168,85,247,0.6)] animate-pulse" />
                                     <h3 className="text-lg font-black tracking-wide">
@@ -354,58 +355,163 @@ export default function DetailDrawer() {
                                 </div>
                             </div>
 
-                            {selectedTicker && (
-                                <div className="space-y-6 w-full overflow-hidden">
-                                    {/* Open Interest - Full Width (Primary) */}
-                                    <div className="w-full min-w-0 overflow-hidden">
-                                        <MetricChart
-                                            symbol={selectedTicker.symbol}
-                                            metric="openInterest"
-                                            period={chartInterval}
-                                            color="#a855f7"
-                                        />
-                                    </div>
-
-                                    {/* Ratio Metrics - 2 Column Grid */}
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
-                                        <div className="min-w-0 overflow-hidden">
-                                            <MetricChart
-                                                symbol={selectedTicker.symbol}
-                                                metric="globalLongShort"
-                                                period={chartInterval}
-                                                color="#14b8a6"
-                                            />
-                                        </div>
-                                        <div className="min-w-0 overflow-hidden">
-                                            <MetricChart
-                                                symbol={selectedTicker.symbol}
-                                                metric="takerBuySell"
-                                                period={chartInterval}
-                                                color="#22c55e"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    {/* Top Traders - 2 Column Grid */}
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
-                                        <div className="min-w-0 overflow-hidden">
-                                            <MetricChart
-                                                symbol={selectedTicker.symbol}
-                                                metric="topLongShortAccounts"
-                                                period={chartInterval}
-                                                color="#3b82f6"
-                                            />
-                                        </div>
-                                        <div className="min-w-0 overflow-hidden">
-                                            <MetricChart
-                                                symbol={selectedTicker.symbol}
-                                                metric="topLongShortPositions"
-                                                period={chartInterval}
-                                                color="#f97316"
-                                            />
-                                        </div>
-                                    </div>
+                            {/* Market Type Segmented Control - Liquid Metal Style */}
+                            <div className="mb-8">
+                                <div className="inline-flex p-1 rounded-xl bg-black/40 border border-white/5 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
+                                    {(['futures', 'spot'] as MarketType[]).map((type) => {
+                                        const isActive = marketDataType === type;
+                                        return (
+                                            <button
+                                                key={type}
+                                                onClick={() => setMarketDataType(type)}
+                                                className={`
+                                                    relative px-5 py-2 text-xs font-mono font-bold uppercase tracking-widest
+                                                    rounded-lg transition-all duration-300
+                                                    ${isActive
+                                                        ? 'text-teal-300 bg-gradient-to-r from-teal-900/80 via-teal-800/60 to-teal-900/80 border border-teal-500/30 shadow-[0_0_20px_rgba(20,184,166,0.25)]'
+                                                        : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5 border border-transparent'
+                                                    }
+                                                `}
+                                            >
+                                                {type === 'futures' ? '⚡ Futures' : '📊 Spot'}
+                                                {/* Active Glow Bar */}
+                                                {isActive && (
+                                                    <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-gradient-to-r from-transparent via-teal-400 to-transparent rounded-full" />
+                                                )}
+                                            </button>
+                                        );
+                                    })}
                                 </div>
+                            </div>
+
+                            {selectedTicker && (
+                                <>
+                                    {/* FUTURES DATA VIEW */}
+                                    {marketDataType === 'futures' && (
+                                        <div className="space-y-6 w-full overflow-hidden animate-in fade-in slide-in-from-bottom-3 duration-500">
+                                            {/* Open Interest - Full Width (Primary) */}
+                                            <div className="w-full min-w-0 overflow-hidden">
+                                                <MetricChart
+                                                    symbol={selectedTicker.symbol}
+                                                    metric="openInterest"
+                                                    period={chartInterval}
+                                                    color="#a855f7"
+                                                />
+                                            </div>
+
+                                            {/* Ratio Metrics - 2 Column Grid */}
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+                                                <div className="min-w-0 overflow-hidden">
+                                                    <MetricChart
+                                                        symbol={selectedTicker.symbol}
+                                                        metric="globalLongShort"
+                                                        period={chartInterval}
+                                                        color="#14b8a6"
+                                                    />
+                                                </div>
+                                                <div className="min-w-0 overflow-hidden">
+                                                    <MetricChart
+                                                        symbol={selectedTicker.symbol}
+                                                        metric="takerBuySell"
+                                                        period={chartInterval}
+                                                        color="#22c55e"
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            {/* Top Traders - 2 Column Grid */}
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+                                                <div className="min-w-0 overflow-hidden">
+                                                    <MetricChart
+                                                        symbol={selectedTicker.symbol}
+                                                        metric="topLongShortAccounts"
+                                                        period={chartInterval}
+                                                        color="#3b82f6"
+                                                    />
+                                                </div>
+                                                <div className="min-w-0 overflow-hidden">
+                                                    <MetricChart
+                                                        symbol={selectedTicker.symbol}
+                                                        metric="topLongShortPositions"
+                                                        period={chartInterval}
+                                                        color="#f97316"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* SPOT DATA VIEW - Full Margin Intelligence Grid */}
+                                    {marketDataType === 'spot' && (
+                                        <div className="space-y-6 w-full overflow-hidden animate-in fade-in slide-in-from-bottom-3 duration-500">
+                                            {/* Money Flow - Full Width (Primary) */}
+                                            <div className="w-full min-w-0 overflow-hidden">
+                                                <MetricChart
+                                                    symbol={selectedTicker.symbol}
+                                                    metric="moneyFlow"
+                                                    period={chartInterval}
+                                                    color="#F59E0B"
+                                                    marketType="spot"
+                                                />
+                                            </div>
+
+                                            {/* Margin Metrics - 2 Column Grid */}
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+                                                <div className="min-w-0 overflow-hidden">
+                                                    <MetricChart
+                                                        symbol={selectedTicker.symbol}
+                                                        metric="24hrLargeInflow"
+                                                        period={chartInterval}
+                                                        color="#10B981"
+                                                        marketType="spot"
+                                                    />
+                                                </div>
+                                                <div className="min-w-0 overflow-hidden">
+                                                    <MetricChart
+                                                        symbol={selectedTicker.symbol}
+                                                        metric="marginDebtGrowth"
+                                                        period={chartInterval}
+                                                        color="#EF4444"
+                                                        marketType="spot"
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            {/* Advanced Margin Metrics - 2 Column Grid */}
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+                                                <div className="min-w-0 overflow-hidden">
+                                                    <MetricChart
+                                                        symbol={selectedTicker.symbol}
+                                                        metric="marginLongShortRatio"
+                                                        period={chartInterval}
+                                                        color="#3B82F6"
+                                                        marketType="spot"
+                                                    />
+                                                </div>
+                                                <div className="min-w-0 overflow-hidden">
+                                                    <MetricChart
+                                                        symbol={selectedTicker.symbol}
+                                                        metric="isoMarginBorrowRatio"
+                                                        period={chartInterval}
+                                                        color="#8B5CF6"
+                                                        marketType="spot"
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            {/* Taker Buy/Sell Ratio - Full Width (Strategic Replacement) */}
+                                            <div className="w-full min-w-0 overflow-hidden">
+                                                <MetricChart
+                                                    symbol={selectedTicker.symbol}
+                                                    metric="takerBuySell"
+                                                    period={chartInterval}
+                                                    color="#22C55E"
+                                                    marketType="spot"
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
+                                </>
                             )}
                         </div>
 

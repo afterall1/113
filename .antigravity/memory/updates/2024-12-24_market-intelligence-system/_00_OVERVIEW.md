@@ -1,6 +1,6 @@
 # Market Intelligence System - Session Documentation
 > **Date**: 2024-12-24
-> **Session ID**: MVP-V1.4-MARKET-INTELLIGENCE
+> **Session ID**: MVP-V1.5-SPOT-MARGIN-INTEGRATION
 > **Status**: PRODUCTION READY
 
 ---
@@ -13,6 +13,7 @@
 | `_02_METRIC_CHART.md` | MetricChart component implementation |
 | `_03_DETAIL_DRAWER.md` | DetailDrawer integration and layout |
 | `_04_OVERFLOW_FIXES.md` | CSS overflow fixes and constraints |
+| `_05_SPOT_MARGIN_EXTENSION.md` | Spot/Margin data integration (2024-12-25) |
 
 ---
 
@@ -22,8 +23,8 @@ This session implemented a complete **Market Intelligence** system that fetches 
 
 ### Key Deliverables:
 1. **Backend Proxy** (`app/api/binance/metrics/route.ts`) - New API route with period validation
-2. **MetricChart Component** (`components/MetricChart.tsx`) - Visualization with lightweight-charts
-3. **DetailDrawer Integration** - Expanded layout with 5 metric charts
+2. **MetricChart Component** (`components/MetricChart.tsx`) - Visualization with lightweight-charts + `marketType` prop
+3. **DetailDrawer Integration** - Expanded layout with Futures/Spot tab switcher + 11 total metric charts
 4. **Type Definitions** (`lib/types.ts`) - New interfaces for metric data
 
 ---
@@ -39,8 +40,9 @@ This session implemented a complete **Market Intelligence** system that fetches 
 ### Modified Files:
 | Path | Changes |
 |------|---------|
-| `lib/types.ts` | Added `MetricType`, `OpenInterestData`, `LongShortRatioData`, `TakerBuySellData` |
-| `components/DetailDrawer.tsx` | Expanded to 1400px, added Market Intelligence grid |
+| `lib/types.ts` | Added `MetricType`, `MarketType`, `OpenInterestData`, `LongShortRatioData`, `TakerBuySellData`, `MoneyFlowData`, `MarginDebtData`, `IsoMarginBorrowData`, `MarginLongShortData` |
+| `components/DetailDrawer.tsx` | Expanded to 1400px, added Market Intelligence grid + Futures/Spot tab switcher |
+| `components/MetricChart.tsx` | Added `marketType` prop, extended `transformData()` for Spot metrics |
 
 ---
 
@@ -62,8 +64,14 @@ Chart intervals like `1m, 3m, 8h, 3d, 1w, 1M` are **invalid** for these endpoint
 ```
 
 ### 2. Layout Strategy
-Open Interest (primary metric) gets **full width**.
-Ratio metrics arranged in **2-column grid** for readability.
+**Futures Tab:**
+- Open Interest (primary): Full width.
+- Ratio metrics: 2-column grid.
+
+**Spot Tab:**
+- Money Flow (primary): Full width.
+- Margin metrics: 2x2 grid.
+- Taker Buy/Sell (closing): Full width.
 
 ### 3. Overflow Prevention
 CSS Grid default `min-width: auto` causes canvas overflow.
@@ -98,8 +106,20 @@ npm run build
 2. Implement historical period comparison
 3. Add metric tooltips with explanations
 4. Mobile-specific layout optimizations
+5. Real Spot/Margin API integration (when Binance provides public endpoints)
+
+## COMPLETED IN LATER SESSION (2024-12-25)
+
+The following were implemented in Sprint Mike:
+- ✅ Spot/Margin tab switcher
+- ✅ 6 additional Spot metrics
+- ✅ Quantum Fade transition animation
+- ✅ `marketType` prop in MetricChart
+
+See: `_05_SPOT_MARGIN_EXTENSION.md` for full details.
 
 ---
 
 *Document generated: 2024-12-24T23:49:22+03:00*
-*State Hash: MVP-V1.4-MARKET-INTELLIGENCE*
+*Updated: 2024-12-25T03:48:00+03:00*
+*State Hash: MVP-V1.5-SPOT-MARGIN-INTEGRATION*

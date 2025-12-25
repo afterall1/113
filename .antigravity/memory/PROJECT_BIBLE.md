@@ -3,8 +3,8 @@
 
 # Liquidity Nebula Project Bible
 > [!IMPORTANT]
-> **Status**: v1.0.0 RELEASE CANDIDATE
-> **Date**: 2025-12-18
+> **Status**: v1.1.0 MARKET INTELLIGENCE COMPLETE
+> **Date**: 2025-12-25
 
 ## 1. Core Logic
 - **Dynamic Percent Change**: The application must calculate percentage changes dynamically based on user selection (e.g., 1m, 5m, 15m, 1h, 4h, 1d). The visualization should update instantly to reflect the selected volatility timeframe.
@@ -13,6 +13,7 @@
   - Direct browser calls to Binance Futures API are FORBIDDEN due to CORS.
   - MUST use `/api/binance/metrics`.
   - **Period Validation**: This API only accepts `5m, 15m, 30m, 1h, 2h, 4h, 6h, 12h, 1d`. All other timeframes (e.g., 1m, 3d, 1w) MUST be mapped to the nearest valid period server-side.
+  - **Market Type Routing**: The proxy accepts `marketType` parameter (`futures` or `spot`). Default is `futures`. Spot endpoints use different Binance APIs or Futures fallbacks where no Spot equivalent exists.
 
 - **On-Demand Data Pattern (NEW)**: Detailed fundamental data (FDV, Unlocks, Tags) is NOT streamed. It is fetched asynchronously via `SWR` only when a user selects an orb (Lazy Loading).
 
@@ -39,13 +40,24 @@
   - **Top Traders (Positions)**: Orange (`#f97316`) - Smart money view.
   - **Taker Buy/Sell**: Green (`#22c55e`) - Aggressive flow.
 
+- **Spot/Margin Metric Color Coding**:
+  - **Money Flow**: Gold (`#F59E0B`) - Capital movement indicator.
+  - **24h Large Inflow**: Emerald (`#10B981`) - Whale activity.
+  - **Margin Debt Growth**: Red (`#EF4444`) - Leverage risk signal.
+  - **Margin Long/Short**: Blue (`#3B82F6`) - Spot market sentiment.
+  - **ISO Margin Borrow**: Purple (`#8B5CF6`) - Isolated position risk.
+  - **Taker Buy/Sell (Spot)**: Green (`#22C55E`) - Active market flow.
+
 - **Wide Cockpit Layout (DetailDrawer)**:
   - **Width Constraints**: Max width extends to `1400px` (or `90vw`).
   - **Grid Discipline**: All Grid Items containing Charts MUST have `min-w-0` and `overflow-hidden` to prevent Canvas blow-out.
   - **Hierarchy**:
     1. Header (Symbol/Price)
     2. Price Chart (Main Context)
-    3. Market Intelligence Grid (OI = Full Width, Ratios = 2 Columns)
+    3. Market Intelligence Section:
+       - Tab Switcher (Futures/Spot) - Liquid Metal Segmented Control
+       - Futures Grid: OI (Full Width), Ratios (2 Columns)
+       - Spot Grid: Money Flow (Full Width), Metrics (2x2 Grid), Taker B/S (Full Width)
 
 
 ## 3. Data Structure
@@ -86,7 +98,22 @@ interface TokenMetadata {
 }
 
 // Market Intelligence Metrics
-type MetricType = 'openInterest' | 'topLongShortAccounts' | 'topLongShortPositions' | 'globalLongShort' | 'takerBuySell';
+type MetricType = 
+  | 'openInterest' 
+  | 'topLongShortAccounts' 
+  | 'topLongShortPositions' 
+  | 'globalLongShort' 
+  | 'takerBuySell'
+  | 'basis'
+  // Spot/Margin Metrics
+  | '24hrLargeInflow'
+  | 'marginDebtGrowth'
+  | 'isoMarginBorrowRatio'
+  | 'platformConcentration'
+  | 'marginLongShortRatio'
+  | 'moneyFlow';
+
+type MarketType = 'futures' | 'spot';
 
 interface MetricDataPoint {
   timestamp: number;
@@ -105,6 +132,36 @@ interface LongShortRatioData {
   symbol: string;
   longShortRatio: string;
   timestamp: number;
+}
+
+// Spot/Margin Data Structures
+interface MoneyFlowData {
+  asset: string;
+  timestamp: number;
+  netInflow: string;
+  largeInflow: string;
+  largeOutflow: string;
+}
+
+interface MarginDebtData {
+  asset: string;
+  timestamp: number;
+  debtSize: string;
+  debtGrowthRate: string;
+}
+
+interface IsoMarginBorrowData {
+  symbol: string;
+  timestamp: number;
+  borrowRatio: string;
+}
+
+interface MarginLongShortData {
+  symbol: string;
+  timestamp: number;
+  longShortRatio: string;
+  longPosition: string;
+  shortPosition: string;
 }
 
 ```

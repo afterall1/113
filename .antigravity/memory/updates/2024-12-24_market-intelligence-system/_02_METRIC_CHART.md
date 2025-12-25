@@ -33,7 +33,7 @@ import {
     HistogramSeries,
     Time,
 } from 'lightweight-charts';
-import { MetricType, OpenInterestData, LongShortRatioData, TakerBuySellData } from '@/lib/types';
+import { MetricType, MarketType, OpenInterestData, LongShortRatioData, TakerBuySellData, MoneyFlowData, MarginDebtData, MarginLongShortData } from '@/lib/types';
 
 interface MetricChartProps {
     symbol: string;
@@ -42,6 +42,7 @@ interface MetricChartProps {
     color?: string;
     limit?: number;
     className?: string;
+    marketType?: MarketType;  // NEW: For Futures/Spot routing
 }
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -52,6 +53,15 @@ const formatValue = (value: number, metric: MetricType): string => {
         if (value >= 1000) return `${(value / 1000).toFixed(2)}B`;
         if (value >= 1) return `${value.toFixed(2)}M`;
         return `${(value * 1000).toFixed(0)}K`;
+    }
+    // Spot/Margin metrics formatting
+    if (metric === 'moneyFlow' || metric === '24hrLargeInflow') {
+        if (Math.abs(value) >= 1000) return `${(value / 1000).toFixed(2)}B`;
+        if (Math.abs(value) >= 1) return `${value.toFixed(2)}M`;
+        return `${(value * 1000).toFixed(0)}K`;
+    }
+    if (metric === 'marginDebtGrowth' || metric === 'isoMarginBorrowRatio') {
+        return `${value.toFixed(2)}%`;
     }
     return value.toFixed(2);
 };
@@ -77,8 +87,23 @@ const transformData = (data: any[], metric: MetricType): { time: Time; value: nu
                 case 'takerBuySell':
                     value = parseFloat((item as TakerBuySellData).buySellRatio);
                     break;
+                // Spot/Margin Metrics - use pre-normalized 'value' field from route.ts
+                case 'moneyFlow':
+                case '24hrLargeInflow':
+                    value = parseFloat(item.value || item.netInflow || '0');
+                    break;
+                case 'marginDebtGrowth':
+                    value = parseFloat(item.debtGrowthRate || item.value || '0');
+                    break;
+                case 'marginLongShortRatio':
+                    value = parseFloat((item as MarginLongShortData).longShortRatio || item.value || '0');
+                    break;
+                case 'isoMarginBorrowRatio':
+                case 'platformConcentration':
+                    value = parseFloat(item.longShortRatio || item.value || item.ratio || '0');
+                    break;
                 default:
-                    value = 0;
+                    value = parseFloat(item.value) || 0;
             }
 
             return { time: timestamp as Time, value };
@@ -117,6 +142,7 @@ export function MetricChart({
     color = '#14b8a6',
     limit = 30,
     className,
+    marketType = 'futures',  // NEW: Default to futures
 }: MetricChartProps) {
     const chartContainerRef = useRef<HTMLDivElement>(null);
     const chartRef = useRef<IChartApi | null>(null);
@@ -125,7 +151,7 @@ export function MetricChart({
     // Fetch metric data via Proxy API
     const { data: rawData, isLoading, error } = useSWR(
         symbol && metric
-            ? `/api/binance/metrics?symbol=${symbol}&metric=${metric}&period=${period}&limit=${limit}`
+            ? `/api/binance/metrics?symbol=${symbol}&metric=${metric}&period=${period}&limit=${limit}&marketType=${marketType}`
             : null,
         fetcher,
         {
@@ -275,6 +301,13 @@ export function MetricChart({
         globalLongShort: 'Global Long/Short',
         takerBuySell: 'Taker Buy/Sell',
         basis: 'Basis',
+        // Spot/Margin Metrics
+        '24hrLargeInflow': '24h Large Inflow',
+        marginDebtGrowth: 'Margin Debt Growth',
+        isoMarginBorrowRatio: 'Isolated Margin Borrow',
+        platformConcentration: 'Platform Concentration',
+        marginLongShortRatio: 'Margin Long/Short',
+        moneyFlow: 'Money Flow',
     };
 
     // Value color based on trend and metric type
@@ -371,6 +404,7 @@ export function MetricChart({
 | `color` | `string` | `'#14b8a6'` | Chart color |
 | `limit` | `number` | `30` | Number of data points |
 | `className` | `string` | - | Additional CSS classes |
+| `marketType` | `MarketType` | `'futures'` | Market type for API routing (`'futures'` or `'spot'`) |
 
 ---
 
@@ -383,6 +417,17 @@ export function MetricChart({
 | Top Accounts L/S | Blue | `#3b82f6` |
 | Top Positions L/S | Orange | `#f97316` |
 | Taker Buy/Sell | Green | `#22c55e` |
+
+### Spot/Margin Metrics Color Assignments
+
+| Metric | Color | Hex |
+|--------|-------|-----|
+| Money Flow | Gold | `#F59E0B` |
+| 24h Large Inflow | Emerald | `#10B981` |
+| Margin Debt Growth | Red | `#EF4444` |
+| Margin Long/Short | Blue | `#3B82F6` |
+| ISO Margin Borrow | Purple | `#8B5CF6` |
+| Taker Buy/Sell (Spot) | Green | `#22C55E` |
 
 ---
 
@@ -419,6 +464,31 @@ value = parseFloat(item.sumOpenInterestValue) / 1e6;
 value = parseFloat(item.longShortRatio);
 ```
 
+### 4. Spot Metric Data Access
+```typescript
+// Spot metrics use pre-normalized values from route.ts
+// DO NOT divide by 1e6 again - data is already in millions/ratios
+
+case 'moneyFlow':
+case '24hrLargeInflow':
+    value = parseFloat(item.value || item.netInflow || '0');  // Already normalized
+    break;
+
+case 'marginDebtGrowth':
+    value = parseFloat(item.debtGrowthRate || item.value || '0');  // Already percentage
+    break;
+```
+
+### 5. MarketType Prop Usage
+```tsx
+// Futures tab (default)
+<MetricChart symbol={symbol} metric="openInterest" />
+
+// Spot tab (explicit)
+<MetricChart symbol={symbol} metric="moneyFlow" marketType="spot" />
+```
+
 ---
 
 *Prompt ID: METRIC_CHART_001*
+*Updated: 2024-12-25T03:48:00+03:00*

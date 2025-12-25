@@ -76,13 +76,23 @@ export interface TradeOrder {
 
 // --- BINANCE FUTURES METRICS TYPES ---
 
+// Market Type for API routing
+export type MarketType = 'futures' | 'spot';
+
 export type MetricType =
   | 'openInterest'
   | 'topLongShortAccounts'
   | 'topLongShortPositions'
   | 'globalLongShort'
   | 'takerBuySell'
-  | 'basis';
+  | 'basis'
+  // Spot/Margin Metrics
+  | '24hrLargeInflow'
+  | 'marginDebtGrowth'
+  | 'isoMarginBorrowRatio'
+  | 'platformConcentration'
+  | 'marginLongShortRatio'
+  | 'moneyFlow';
 
 // Open Interest History Data Point
 export interface OpenInterestData {
@@ -111,5 +121,47 @@ export interface TakerBuySellData {
   timestamp: number;
 }
 
+// --- SPOT/MARGIN METRICS TYPES ---
+
+// Spot/Margin Money Flow Data
+export interface MoneyFlowData {
+  asset: string;
+  timestamp: number;
+  netInflow: string;        // Net inflow in USD
+  largeInflow: string;      // Large order inflow
+  largeOutflow: string;     // Large order outflow
+}
+
+// Margin Debt Growth Data
+export interface MarginDebtData {
+  asset: string;
+  timestamp: number;
+  debtSize: string;         // Total debt in asset units
+  debtGrowthRate: string;   // Growth percentage
+}
+
+// Isolated Margin Borrow Ratio
+export interface IsoMarginBorrowData {
+  symbol: string;
+  timestamp: number;
+  borrowRatio: string;      // Borrow/Collateral ratio
+}
+
+// Margin Long/Short Ratio (Spot Markets)
+export interface MarginLongShortData {
+  symbol: string;
+  timestamp: number;
+  longShortRatio: string;
+  longPosition: string;
+  shortPosition: string;
+}
+
 // Generic union for all metric responses
-export type MetricDataPoint = OpenInterestData | LongShortRatioData | TakerBuySellData;
+export type MetricDataPoint =
+  | OpenInterestData
+  | LongShortRatioData
+  | TakerBuySellData
+  | MoneyFlowData
+  | MarginDebtData
+  | IsoMarginBorrowData
+  | MarginLongShortData;

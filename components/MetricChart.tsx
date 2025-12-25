@@ -11,7 +11,7 @@ import {
     HistogramSeries,
     Time,
 } from 'lightweight-charts';
-import { MetricType, OpenInterestData, LongShortRatioData, TakerBuySellData } from '@/lib/types';
+import { MetricType, MarketType, OpenInterestData, LongShortRatioData, TakerBuySellData, MoneyFlowData, MarginDebtData, MarginLongShortData } from '@/lib/types';
 
 interface MetricChartProps {
     symbol: string;
@@ -20,6 +20,7 @@ interface MetricChartProps {
     color?: string;
     limit?: number;
     className?: string;
+    marketType?: MarketType;
 }
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -30,6 +31,15 @@ const formatValue = (value: number, metric: MetricType): string => {
         if (value >= 1000) return `${(value / 1000).toFixed(2)}B`;
         if (value >= 1) return `${value.toFixed(2)}M`;
         return `${(value * 1000).toFixed(0)}K`;
+    }
+    // Spot/Margin metrics formatting
+    if (metric === 'moneyFlow' || metric === '24hrLargeInflow') {
+        if (Math.abs(value) >= 1000) return `${(value / 1000).toFixed(2)}B`;
+        if (Math.abs(value) >= 1) return `${value.toFixed(2)}M`;
+        return `${(value * 1000).toFixed(0)}K`;
+    }
+    if (metric === 'marginDebtGrowth' || metric === 'isoMarginBorrowRatio') {
+        return `${value.toFixed(2)}%`;
     }
     return value.toFixed(2);
 };
@@ -55,13 +65,30 @@ const transformData = (data: any[], metric: MetricType): { time: Time; value: nu
                 case 'takerBuySell':
                     value = parseFloat((item as TakerBuySellData).buySellRatio);
                     break;
+                // Spot/Margin Metrics - use pre-normalized 'value' field from route.ts
+                case 'moneyFlow':
+                case '24hrLargeInflow':
+                    // route.ts already provides normalized 'value' field
+                    value = parseFloat(item.value || item.netInflow || '0');
+                    break;
+                case 'marginDebtGrowth':
+                    // debtGrowthRate is already a percentage
+                    value = parseFloat(item.debtGrowthRate || item.value || '0');
+                    break;
+                case 'marginLongShortRatio':
+                    value = parseFloat((item as MarginLongShortData).longShortRatio || item.value || '0');
+                    break;
+                case 'isoMarginBorrowRatio':
+                case 'platformConcentration':
+                    value = parseFloat(item.longShortRatio || item.value || item.ratio || '0');
+                    break;
                 default:
-                    value = 0;
+                    value = parseFloat(item.value) || 0;
             }
 
             return { time: timestamp as Time, value };
         })
-        .filter((d) => d.value && !isNaN(d.value))
+        .filter((d) => d.value !== undefined && !isNaN(d.value))
         .sort((a, b) => Number(a.time) - Number(b.time));
 };
 
@@ -95,6 +122,7 @@ export function MetricChart({
     color = '#14b8a6',
     limit = 30,
     className,
+    marketType = 'futures',
 }: MetricChartProps) {
     const chartContainerRef = useRef<HTMLDivElement>(null);
     const chartRef = useRef<IChartApi | null>(null);
@@ -103,7 +131,7 @@ export function MetricChart({
     // Fetch metric data via Proxy API
     const { data: rawData, isLoading, error } = useSWR(
         symbol && metric
-            ? `/api/binance/metrics?symbol=${symbol}&metric=${metric}&period=${period}&limit=${limit}`
+            ? `/api/binance/metrics?symbol=${symbol}&metric=${metric}&period=${period}&limit=${limit}&marketType=${marketType}`
             : null,
         fetcher,
         {
@@ -255,6 +283,13 @@ export function MetricChart({
         globalLongShort: 'Global Long/Short',
         takerBuySell: 'Taker Buy/Sell',
         basis: 'Basis',
+        // Spot/Margin Metrics
+        '24hrLargeInflow': '24h Large Inflow',
+        marginDebtGrowth: 'Margin Debt Growth',
+        isoMarginBorrowRatio: 'Isolated Margin Borrow',
+        platformConcentration: 'Platform Concentration',
+        marginLongShortRatio: 'Margin Long/Short',
+        moneyFlow: 'Money Flow',
     };
 
     // Value color based on trend and metric type

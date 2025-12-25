@@ -1,6 +1,6 @@
 # CONTEXT HASH
-> **Hash**: `MVP-V1.4-MARKET-INTELLIGENCE`
-> **Timestamp**: 2024-12-24 (Late Session)
+> **Hash**: `MVP-V1.5-SPOT-MARGIN-INTEGRATION`
+> **Timestamp**: 2024-12-25 (Spot/Margin Session)
 > **Status**: STABLE
 
 ## MVP Features
@@ -10,6 +10,7 @@
 - [x] **Holographic HUD**: Centralized Detail Window ("Aerogel" Glass).
 - [x] **Chart Infrastructure**: MiniChart with Proxy & Premium UI.
 - [x] **Market Intelligence**: Derivatives metrics (OI, L/S Ratios) with MetricChart.
+- [x] **Spot/Margin Data**: Dual-market tab switcher with Spot metrics grid.
 
 
 ## Next Phase
@@ -98,4 +99,30 @@
 - **UI Overhaul**: Expanded `DetailDrawer` to `max-w-[1400px]` (Wide Cockpit).
 - **CSS Logic**: Enforced `min-w-0` on all Grid items to prevent Canvas overflow.
 - **Visuals**: Added specific color coding for OI (Purple), Global Ratio (Teal), Top Traders (Blue/Orange).
+- **Status**: Production Ready.
+
+### [Sprint Mike: Spot/Margin Data Integration]
+- **Date**: 2024-12-25
+- **Feature Added**: Dual-market tab switcher in DetailDrawer (Futures/Spot).
+- **Backend Extension**:
+  - Split `METRIC_ENDPOINTS` into `FUTURES_ENDPOINTS` and `SPOT_ENDPOINTS`.
+  - Added `marketType` parameter to `/api/binance/metrics` proxy.
+  - Created `transformTickerToTimeSeries()` for 24hr ticker → time series.
+  - Created `transformKlinesToDebtGrowth()` for klines → debt proxy.
+- **Type Additions**:
+  - `MarketType` union (`'futures' | 'spot'`).
+  - Extended `MetricType` with: `'24hrLargeInflow'`, `'marginDebtGrowth'`, `'isoMarginBorrowRatio'`, `'platformConcentration'`, `'marginLongShortRatio'`, `'moneyFlow'`.
+  - New interfaces: `MoneyFlowData`, `MarginDebtData`, `IsoMarginBorrowData`, `MarginLongShortData`.
+- **MetricChart Updates**:
+  - Added `marketType` prop.
+  - Updated SWR URL to include `marketType` parameter.
+  - Extended `transformData()` with Spot metric cases.
+  - Added Spot metric labels and formatting.
+- **DetailDrawer Changes**:
+  - Added `marketDataType` state (`'futures' | 'spot'`).
+  - Implemented Liquid Metal segmented control (Teal glow active).
+  - Quantum Fade animation (`slide-in-from-bottom-3 duration-500`).
+  - Spot Grid: 6 MetricCharts (Money Flow, 24h Inflow, Margin Debt, Margin L/S, ISO Borrow, Taker B/S).
+- **Strategic Replacement**: `platformConcentration` → `takerBuySell` (no public API for Platform Concentration).
+- **Bug Fix**: Removed double division in MetricChart for Spot metrics (data was already normalized).
 - **Status**: Production Ready.
