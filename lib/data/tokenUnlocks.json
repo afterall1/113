@@ -1,0 +1,836 @@
+{
+    "_meta": {
+        "version": "1.0.0",
+        "updated": "2025-12-25",
+        "description": "Curated token unlock schedules for top Binance Futures coins"
+    },
+    "unlocks": {
+        "ARB": {
+            "protocol": "arbitrum",
+            "nextUnlock": {
+                "date": "2025-03-16",
+                "amount": 92150000,
+                "percentOfSupply": 2.1,
+                "category": "Team & Investors"
+            },
+            "allocations": [
+                {
+                    "category": "Team",
+                    "percent": 26.9
+                },
+                {
+                    "category": "Investors",
+                    "percent": 17.5
+                },
+                {
+                    "category": "DAO Treasury",
+                    "percent": 42.8
+                },
+                {
+                    "category": "Airdrop",
+                    "percent": 12.8
+                }
+            ]
+        },
+        "OP": {
+            "protocol": "optimism",
+            "nextUnlock": {
+                "date": "2025-01-31",
+                "amount": 31340000,
+                "percentOfSupply": 0.73,
+                "category": "Core Contributors"
+            },
+            "allocations": [
+                {
+                    "category": "Ecosystem Fund",
+                    "percent": 25
+                },
+                {
+                    "category": "Retroactive Funding",
+                    "percent": 20
+                },
+                {
+                    "category": "Core Contributors",
+                    "percent": 19
+                },
+                {
+                    "category": "Investors",
+                    "percent": 17
+                },
+                {
+                    "category": "Airdrop",
+                    "percent": 19
+                }
+            ]
+        },
+        "SUI": {
+            "protocol": "sui",
+            "nextUnlock": {
+                "date": "2025-01-01",
+                "amount": 64000000,
+                "percentOfSupply": 0.64,
+                "category": "Investors"
+            },
+            "allocations": [
+                {
+                    "category": "Community Reserve",
+                    "percent": 50
+                },
+                {
+                    "category": "Early Contributors",
+                    "percent": 20
+                },
+                {
+                    "category": "Investors",
+                    "percent": 14
+                },
+                {
+                    "category": "Mysten Labs Treasury",
+                    "percent": 10
+                },
+                {
+                    "category": "Community Access",
+                    "percent": 6
+                }
+            ]
+        },
+        "APT": {
+            "protocol": "aptos",
+            "nextUnlock": {
+                "date": "2025-01-12",
+                "amount": 11310000,
+                "percentOfSupply": 1.0,
+                "category": "Foundation"
+            },
+            "allocations": [
+                {
+                    "category": "Community",
+                    "percent": 51.0
+                },
+                {
+                    "category": "Core Contributors",
+                    "percent": 19.0
+                },
+                {
+                    "category": "Foundation",
+                    "percent": 16.5
+                },
+                {
+                    "category": "Investors",
+                    "percent": 13.5
+                }
+            ]
+        },
+        "SEI": {
+            "protocol": "sei",
+            "nextUnlock": {
+                "date": "2025-02-15",
+                "amount": 55000000,
+                "percentOfSupply": 0.55,
+                "category": "Team"
+            },
+            "allocations": [
+                {
+                    "category": "Ecosystem Reserve",
+                    "percent": 48
+                },
+                {
+                    "category": "Private Sale",
+                    "percent": 20
+                },
+                {
+                    "category": "Team",
+                    "percent": 20
+                },
+                {
+                    "category": "Foundation",
+                    "percent": 9
+                },
+                {
+                    "category": "Airdrop",
+                    "percent": 3
+                }
+            ]
+        },
+        "TIA": {
+            "protocol": "celestia",
+            "nextUnlock": {
+                "date": "2025-10-31",
+                "amount": 175740000,
+                "percentOfSupply": 17.57,
+                "category": "Investors & Team"
+            },
+            "allocations": [
+                {
+                    "category": "Public Sale",
+                    "percent": 20
+                },
+                {
+                    "category": "R&D",
+                    "percent": 26.8
+                },
+                {
+                    "category": "Early Backers",
+                    "percent": 35.6
+                },
+                {
+                    "category": "Foundation",
+                    "percent": 8
+                },
+                {
+                    "category": "Airdrop",
+                    "percent": 7.4
+                }
+            ]
+        },
+        "JUP": {
+            "protocol": "jupiter",
+            "nextUnlock": {
+                "date": "2025-01-31",
+                "amount": 500000000,
+                "percentOfSupply": 5.0,
+                "category": "Community Airdrop"
+            },
+            "allocations": [
+                {
+                    "category": "Community",
+                    "percent": 50
+                },
+                {
+                    "category": "Team",
+                    "percent": 20
+                },
+                {
+                    "category": "Strategic Reserve",
+                    "percent": 20
+                },
+                {
+                    "category": "Liquidity",
+                    "percent": 10
+                }
+            ]
+        },
+        "STRK": {
+            "protocol": "starknet",
+            "nextUnlock": {
+                "date": "2025-04-15",
+                "amount": 64000000,
+                "percentOfSupply": 0.64,
+                "category": "Investors"
+            },
+            "allocations": [
+                {
+                    "category": "Community",
+                    "percent": 50.1
+                },
+                {
+                    "category": "Investors",
+                    "percent": 17
+                },
+                {
+                    "category": "Contributors",
+                    "percent": 32.9
+                }
+            ]
+        },
+        "DYM": {
+            "protocol": "dymension",
+            "nextUnlock": {
+                "date": "2025-02-21",
+                "amount": 10000000,
+                "percentOfSupply": 1.0,
+                "category": "Investors"
+            },
+            "allocations": [
+                {
+                    "category": "Community",
+                    "percent": 33
+                },
+                {
+                    "category": "Ecosystem",
+                    "percent": 22
+                },
+                {
+                    "category": "Team",
+                    "percent": 21
+                },
+                {
+                    "category": "Investors",
+                    "percent": 15
+                },
+                {
+                    "category": "Public Sale",
+                    "percent": 9
+                }
+            ]
+        },
+        "MOVE": {
+            "protocol": "movement",
+            "nextUnlock": {
+                "date": "2025-01-09",
+                "amount": 50000000,
+                "percentOfSupply": 0.5,
+                "category": "Ecosystem"
+            },
+            "allocations": [
+                {
+                    "category": "Community & Ecosystem",
+                    "percent": 40
+                },
+                {
+                    "category": "Early Backers",
+                    "percent": 22
+                },
+                {
+                    "category": "Initial Contributors",
+                    "percent": 17.5
+                },
+                {
+                    "category": "Foundation",
+                    "percent": 10
+                },
+                {
+                    "category": "Airdrop",
+                    "percent": 10
+                }
+            ]
+        },
+        "EIGEN": {
+            "protocol": "eigenlayer",
+            "nextUnlock": {
+                "date": "2025-03-17",
+                "amount": 11200000,
+                "percentOfSupply": 0.67,
+                "category": "Investors"
+            },
+            "allocations": [
+                {
+                    "category": "Stakedrops",
+                    "percent": 45
+                },
+                {
+                    "category": "Investors",
+                    "percent": 29.5
+                },
+                {
+                    "category": "Early Contributors",
+                    "percent": 25.5
+                }
+            ]
+        },
+        "ZK": {
+            "protocol": "zksync",
+            "nextUnlock": {
+                "date": "2025-06-17",
+                "amount": 44300000,
+                "percentOfSupply": 0.21,
+                "category": "Team"
+            },
+            "allocations": [
+                {
+                    "category": "Community",
+                    "percent": 66.7
+                },
+                {
+                    "category": "Investors",
+                    "percent": 17.2
+                },
+                {
+                    "category": "Team",
+                    "percent": 16.1
+                }
+            ]
+        },
+        "W": {
+            "protocol": "wormhole",
+            "nextUnlock": {
+                "date": "2025-04-03",
+                "amount": 600000000,
+                "percentOfSupply": 6.0,
+                "category": "Community"
+            },
+            "allocations": [
+                {
+                    "category": "Community",
+                    "percent": 31
+                },
+                {
+                    "category": "Foundation",
+                    "percent": 23.3
+                },
+                {
+                    "category": "Contributors",
+                    "percent": 23.3
+                },
+                {
+                    "category": "Strategic",
+                    "percent": 11.6
+                },
+                {
+                    "category": "Nodes",
+                    "percent": 5.1
+                }
+            ]
+        },
+        "PYTH": {
+            "protocol": "pyth-network",
+            "nextUnlock": {
+                "date": "2025-05-20",
+                "amount": 212500000,
+                "percentOfSupply": 2.13,
+                "category": "Ecosystem"
+            },
+            "allocations": [
+                {
+                    "category": "Ecosystem",
+                    "percent": 52
+                },
+                {
+                    "category": "Contributors",
+                    "percent": 22
+                },
+                {
+                    "category": "Private Sales",
+                    "percent": 10
+                },
+                {
+                    "category": "Community",
+                    "percent": 6
+                },
+                {
+                    "category": "Protocol Dev",
+                    "percent": 10
+                }
+            ]
+        },
+        "JTO": {
+            "protocol": "jito",
+            "nextUnlock": {
+                "date": "2025-12-07",
+                "amount": 135000000,
+                "percentOfSupply": 13.5,
+                "category": "Core Contributors"
+            },
+            "allocations": [
+                {
+                    "category": "Core Contributors",
+                    "percent": 24.5
+                },
+                {
+                    "category": "Investors",
+                    "percent": 16.2
+                },
+                {
+                    "category": "Community",
+                    "percent": 34.3
+                },
+                {
+                    "category": "Ecosystem",
+                    "percent": 25
+                }
+            ]
+        },
+        "ONDO": {
+            "protocol": "ondo-finance",
+            "nextUnlock": {
+                "date": "2025-01-18",
+                "amount": 1923000000,
+                "percentOfSupply": 19.23,
+                "category": "Investors & Team"
+            },
+            "allocations": [
+                {
+                    "category": "Community",
+                    "percent": 52.1
+                },
+                {
+                    "category": "Team",
+                    "percent": 12.9
+                },
+                {
+                    "category": "Investors",
+                    "percent": 35
+                }
+            ]
+        },
+        "ENA": {
+            "protocol": "ethena",
+            "nextUnlock": {
+                "date": "2025-04-02",
+                "amount": 300000000,
+                "percentOfSupply": 2.0,
+                "category": "Ecosystem"
+            },
+            "allocations": [
+                {
+                    "category": "Airdrop",
+                    "percent": 30
+                },
+                {
+                    "category": "Investors",
+                    "percent": 25
+                },
+                {
+                    "category": "Team",
+                    "percent": 25
+                },
+                {
+                    "category": "Foundation",
+                    "percent": 15
+                },
+                {
+                    "category": "Ecosystem",
+                    "percent": 5
+                }
+            ]
+        },
+        "PENDLE": {
+            "protocol": "pendle",
+            "nextUnlock": {
+                "date": "2025-04-29",
+                "amount": 7780000,
+                "percentOfSupply": 2.52,
+                "category": "Team"
+            },
+            "allocations": [
+                {
+                    "category": "Liquidity Mining",
+                    "percent": 37
+                },
+                {
+                    "category": "Team",
+                    "percent": 22
+                },
+                {
+                    "category": "Ecosystem",
+                    "percent": 16
+                },
+                {
+                    "category": "Private Sale",
+                    "percent": 15
+                },
+                {
+                    "category": "Liquidity",
+                    "percent": 10
+                }
+            ]
+        },
+        "WLD": {
+            "protocol": "worldcoin",
+            "nextUnlock": {
+                "date": "2025-07-24",
+                "amount": 600000000,
+                "percentOfSupply": 6.0,
+                "category": "Community"
+            },
+            "allocations": [
+                {
+                    "category": "Community",
+                    "percent": 75
+                },
+                {
+                    "category": "TFH",
+                    "percent": 9.8
+                },
+                {
+                    "category": "Investors",
+                    "percent": 13.5
+                },
+                {
+                    "category": "Initial Reserve",
+                    "percent": 1.7
+                }
+            ]
+        },
+        "AAVE": {
+            "protocol": "aave",
+            "nextUnlock": {
+                "date": null,
+                "amount": 0,
+                "percentOfSupply": 0,
+                "category": "Fully Circulating"
+            },
+            "allocations": [
+                {
+                    "category": "Community",
+                    "percent": 100
+                }
+            ]
+        },
+        "UNI": {
+            "protocol": "uniswap",
+            "nextUnlock": {
+                "date": null,
+                "amount": 0,
+                "percentOfSupply": 0,
+                "category": "Fully Circulating"
+            },
+            "allocations": [
+                {
+                    "category": "Community",
+                    "percent": 60
+                },
+                {
+                    "category": "Team",
+                    "percent": 21.5
+                },
+                {
+                    "category": "Investors",
+                    "percent": 18.5
+                }
+            ]
+        },
+        "LINK": {
+            "protocol": "chainlink",
+            "nextUnlock": {
+                "date": null,
+                "amount": 0,
+                "percentOfSupply": 0,
+                "category": "Gradual Release"
+            },
+            "allocations": [
+                {
+                    "category": "Node Operators",
+                    "percent": 35
+                },
+                {
+                    "category": "Development",
+                    "percent": 30
+                },
+                {
+                    "category": "Public Sale",
+                    "percent": 35
+                }
+            ]
+        },
+        "AVAX": {
+            "protocol": "avalanche",
+            "nextUnlock": {
+                "date": null,
+                "amount": 0,
+                "percentOfSupply": 0,
+                "category": "Staking Emissions"
+            },
+            "allocations": [
+                {
+                    "category": "Staking Rewards",
+                    "percent": 50
+                },
+                {
+                    "category": "Team",
+                    "percent": 10
+                },
+                {
+                    "category": "Foundation",
+                    "percent": 9.26
+                },
+                {
+                    "category": "Community",
+                    "percent": 12
+                },
+                {
+                    "category": "Public Sales",
+                    "percent": 18.74
+                }
+            ]
+        },
+        "SOL": {
+            "protocol": "solana",
+            "nextUnlock": {
+                "date": null,
+                "amount": 0,
+                "percentOfSupply": 0,
+                "category": "Staking Emissions"
+            },
+            "allocations": [
+                {
+                    "category": "Community",
+                    "percent": 38
+                },
+                {
+                    "category": "Seed Sale",
+                    "percent": 16.23
+                },
+                {
+                    "category": "Foundation",
+                    "percent": 12.5
+                },
+                {
+                    "category": "Team",
+                    "percent": 12.5
+                },
+                {
+                    "category": "Validator Sale",
+                    "percent": 5.18
+                }
+            ]
+        },
+        "BTC": {
+            "protocol": "bitcoin",
+            "nextUnlock": {
+                "date": null,
+                "amount": 0,
+                "percentOfSupply": 0,
+                "category": "Mining Emissions"
+            },
+            "allocations": [
+                {
+                    "category": "Miners",
+                    "percent": 100
+                }
+            ]
+        },
+        "ETH": {
+            "protocol": "ethereum",
+            "nextUnlock": {
+                "date": null,
+                "amount": 0,
+                "percentOfSupply": 0,
+                "category": "Staking Rewards"
+            },
+            "allocations": [
+                {
+                    "category": "Validators",
+                    "percent": 100
+                }
+            ]
+        },
+        "DOGE": {
+            "protocol": "dogecoin",
+            "nextUnlock": {
+                "date": null,
+                "amount": 0,
+                "percentOfSupply": 0,
+                "category": "Mining Emissions"
+            },
+            "allocations": [
+                {
+                    "category": "Miners",
+                    "percent": 100
+                }
+            ]
+        },
+        "PEPE": {
+            "protocol": "pepe",
+            "nextUnlock": {
+                "date": null,
+                "amount": 0,
+                "percentOfSupply": 0,
+                "category": "Fully Circulating"
+            },
+            "allocations": [
+                {
+                    "category": "Community",
+                    "percent": 93.1
+                },
+                {
+                    "category": "CEX Liquidity",
+                    "percent": 6.9
+                }
+            ]
+        },
+        "WIF": {
+            "protocol": "dogwifhat",
+            "nextUnlock": {
+                "date": null,
+                "amount": 0,
+                "percentOfSupply": 0,
+                "category": "Fully Circulating"
+            },
+            "allocations": [
+                {
+                    "category": "Community",
+                    "percent": 100
+                }
+            ]
+        },
+        "BONK": {
+            "protocol": "bonk",
+            "nextUnlock": {
+                "date": null,
+                "amount": 0,
+                "percentOfSupply": 0,
+                "category": "Fully Circulating"
+            },
+            "allocations": [
+                {
+                    "category": "Community Airdrop",
+                    "percent": 50
+                },
+                {
+                    "category": "Contributors",
+                    "percent": 25
+                },
+                {
+                    "category": "Marketing",
+                    "percent": 25
+                }
+            ]
+        },
+        "VIRTUAL": {
+            "protocol": "virtuals-protocol",
+            "nextUnlock": {
+                "date": "2025-03-01",
+                "amount": 10000000,
+                "percentOfSupply": 1.0,
+                "category": "Ecosystem"
+            },
+            "allocations": [
+                {
+                    "category": "Ecosystem",
+                    "percent": 60
+                },
+                {
+                    "category": "Team",
+                    "percent": 20
+                },
+                {
+                    "category": "Investors",
+                    "percent": 20
+                }
+            ]
+        },
+        "AI16Z": {
+            "protocol": "ai16z",
+            "nextUnlock": {
+                "date": null,
+                "amount": 0,
+                "percentOfSupply": 0,
+                "category": "Fully Circulating"
+            },
+            "allocations": [
+                {
+                    "category": "Community",
+                    "percent": 100
+                }
+            ]
+        },
+        "GUNZ": {
+            "protocol": "gunzilla",
+            "nextUnlock": {
+                "date": "2025-01-15",
+                "amount": 25000000,
+                "percentOfSupply": 2.5,
+                "category": "Team & Ecosystem"
+            },
+            "allocations": [
+                {
+                    "category": "Ecosystem",
+                    "percent": 40
+                },
+                {
+                    "category": "Team",
+                    "percent": 20
+                },
+                {
+                    "category": "Investors",
+                    "percent": 25
+                },
+                {
+                    "category": "Community",
+                    "percent": 15
+                }
+            ]
+        }
+    }
+}
