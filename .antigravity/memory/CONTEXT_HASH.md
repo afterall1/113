@@ -1,6 +1,6 @@
 # CONTEXT HASH
-> **Hash**: `MVP-V1.5-SPOT-MARGIN-INTEGRATION`
-> **Timestamp**: 2024-12-25 (Spot/Margin Session)
+> **Hash**: `MVP-V1.6-TOKEN-METADATA-PROXY`
+> **Timestamp**: 2024-12-25 (Token Metadata Session)
 > **Status**: STABLE
 
 ## MVP Features
@@ -11,10 +11,11 @@
 - [x] **Chart Infrastructure**: MiniChart with Proxy & Premium UI.
 - [x] **Market Intelligence**: Derivatives metrics (OI, L/S Ratios) with MetricChart.
 - [x] **Spot/Margin Data**: Dual-market tab switcher with Spot metrics grid.
+- [x] **Token Metadata Proxy**: Real-time CMC/CoinGecko/DeFiLlama data integration.
 
 
 ## Next Phase
-- **Backend Real Implementation**: Replace mock `tokenMetadata.ts` with real CoinGecko/CMC API.
+- **Token Unlock Coverage**: Expand static JSON to 100+ coins for comprehensive unlock data.
 - **Charts**: Add real Sparkline/Candle charts to DetailDrawer.
 - **Mobile**: Touch gesture optimization.
 
@@ -125,4 +126,30 @@
   - Spot Grid: 6 MetricCharts (Money Flow, 24h Inflow, Margin Debt, Margin L/S, ISO Borrow, Taker B/S).
 - **Strategic Replacement**: `platformConcentration` → `takerBuySell` (no public API for Platform Concentration).
 - **Bug Fix**: Removed double division in MetricChart for Spot metrics (data was already normalized).
+- **Status**: Production Ready.
+
+### [Sprint November: Token Metadata Proxy System]
+- **Date**: 2024-12-25
+- **Feature Added**: Real-time token metadata fetching with multi-source fallback.
+- **New Files**:
+  - [app/api/token/metadata/route.ts](cci:7://file:///c:/Users/PC15/Desktop/Projelerim/futures_tracker_v0.3/app/api/token/metadata/route.ts:0:0-0:0) (877 lines - CMC/CoinGecko/DeFiLlama proxy)
+  - [lib/data/tokenUnlocks.json](cci:7://file:///c:/Users/PC15/Desktop/Projelerim/futures_tracker_v0.3/lib/data/tokenUnlocks.json:0:0-0:0) (836 lines - Curated unlock schedules for 35+ coins)
+- **Backend Architecture**:
+  - CMC Deep State Extraction (Hydration Hijacking via `__NEXT_DATA__` regex)
+  - CoinGecko API fallback with dynamic `/search` for unknown symbols
+  - DeFiLlama unlock scraping via HTML parsing
+  - Static JSON fallback for curated unlock data
+  - Recursive [findKey()](cci:1://file:///c:/Users/PC15/Desktop/Projelerim/futures_tracker_v0.3/app/api/token/metadata/route.ts:164:0-196:1) hunter function for structure-agnostic JSON parsing
+- **Symbol Mappings**:
+  - 155+ CMC slug mappings
+  - 40+ CoinGecko ID mappings
+  - 35+ DeFiLlama protocol mappings
+- **Service Rewrite**:
+  - [lib/services/tokenMetadata.ts](cci:7://file:///c:/Users/PC15/Desktop/Projelerim/futures_tracker_v0.3/lib/services/tokenMetadata.ts:0:0-0:0) reduced from 314 → 86 lines
+  - Removed all mock data (`MOCK_TOKEN_DATA`, `generateAllocations()`, `generateGenericMetadata()`)
+  - Clean proxy call with minimal network-error fallback
+- **Debugging Sessions**:
+  - PIPPIN: Added CoinGecko dynamic search fallback
+  - GUNZ: Added to static JSON with curated unlock data
+  - MOVE: Expanded CMC hunter keys + added DeFiLlama scraping
 - **Status**: Production Ready.

@@ -3,7 +3,7 @@
 
 # Liquidity Nebula Project Bible
 > [!IMPORTANT]
-> **Status**: v1.1.0 MARKET INTELLIGENCE COMPLETE
+> **Status**: v1.2.0 TOKEN METADATA PROXY COMPLETE
 > **Date**: 2025-12-25
 
 ## 1. Core Logic
@@ -16,6 +16,18 @@
   - **Market Type Routing**: The proxy accepts `marketType` parameter (`futures` or `spot`). Default is `futures`. Spot endpoints use different Binance APIs or Futures fallbacks where no Spot equivalent exists.
 
 - **On-Demand Data Pattern (NEW)**: Detailed fundamental data (FDV, Unlocks, Tags) is NOT streamed. It is fetched asynchronously via `SWR` only when a user selects an orb (Lazy Loading).
+
+- **Token Metadata Proxy Architecture (NEW)**:
+  - Direct browser calls to CoinMarketCap/CoinGecko are FORBIDDEN.
+  - MUST use `/api/token/metadata?symbol={SYMBOL}`.
+  - **Data Strategy**:
+    1. CMC Deep State Extraction (HTML → `__NEXT_DATA__` → recursive key hunting)
+    2. CoinGecko API fallback (with dynamic search for unknown symbols)
+    3. Safe empty response (never crashes UI)
+  - **Unlock Data Strategy**:
+    1. DeFiLlama HTML scraping (`/unlocks/{protocol}`)
+    2. Static JSON fallback ([lib/data/tokenUnlocks.json](cci:7://file:///c:/Users/PC15/Desktop/Projelerim/futures_tracker_v0.3/lib/data/tokenUnlocks.json:0:0-0:0))
+    3. "N/A" for unmapped coins (no fake data generation)
 
 ## 2. Visual Language
 - **Theme**: Dark Mode ONLY. No light mode support.
@@ -95,7 +107,9 @@ interface TokenMetadata {
   };
   tags: string[];
   chains: string[];
+  description: string; // First sentence from CMC/CoinGecko
 }
+
 
 // Market Intelligence Metrics
 type MetricType = 
@@ -171,6 +185,12 @@ interface MarginLongShortData {
   - **Storage**: Use `Mutable Ref` or `Map` outside React Cycle.
   - **Rendering**: Read directly from storage in `requestAnimationFrame` or `PixiTicker`.
   - **State**: Only use `Zustand/Context` for low-frequency UI updates (Selection, filtering).
+  
+- **Proxy-First Data Fetching**:
+  - ALL external API calls MUST go through Next.js API routes.
+  - Client-side direct API calls to CMC, CoinGecko, DeFiLlama, Binance are FORBIDDEN.
+  - Reason: CORS, rate limiting, error handling centralization.
+  - Pattern: `Frontend → /api/* → External API → Cache (5-10 min) → Response`
 
 ## 5. Feature Specification: The Squadron (Watchlist)
 > **Status**: Active since v1.1
