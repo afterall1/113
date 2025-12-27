@@ -153,3 +153,18 @@
   - GUNZ: Added to static JSON with curated unlock data
   - MOVE: Expanded CMC hunter keys + added DeFiLlama scraping
 - **Status**: Production Ready.
+
+### [Sprint Oscar: Twin-Core Bridge Protocol]
+- **Date**: 2025-12-27
+- **Hash**: `BRIDGE-V1.0-PROVIDER-READY`
+- **Module**: Twin-Core Architecture Preparation
+- **Feature Added**: API Export Protocol for external consumption.
+- **New Files**:
+  - `.antigravity/memory/API_EXPORT_PROTOCOL.md` (Nebula Data Bridge v1.0 specification)
+- **Architecture Change**: Mevcut uygulama, harici Backtest uygulaması (Nebula Forge) için Veri Sağlayıcı (Data Provider) rolüne uyarlandı.
+- **Endpoints Documented**:
+  - `GET /api/binance/metrics` (Futures + Spot metrics)
+  - `GET /api/token/metadata` (CMC/CoinGecko/DeFiLlama proxy)
+  - `GET /api/binance/klines` (OHLC candlestick data)
+- **Integration Rules**: Server-side ve SWR tüketim kalıpları, `lib/types.ts` uyumluluğu tanımlandı.
+- **Status**: Production Ready.

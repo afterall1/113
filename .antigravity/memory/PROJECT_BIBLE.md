@@ -3,8 +3,8 @@
 
 # Liquidity Nebula Project Bible
 > [!IMPORTANT]
-> **Status**: v1.2.0 TOKEN METADATA PROXY COMPLETE
-> **Date**: 2025-12-25
+> **Status**: v1.3.0 BRIDGE-V1.0-PROVIDER-READY
+> **Date**: 2025-12-27
 
 ## 1. Core Logic
 - **Dynamic Percent Change**: The application must calculate percentage changes dynamically based on user selection (e.g., 1m, 5m, 15m, 1h, 4h, 1d). The visualization should update instantly to reflect the selected volatility timeframe.
@@ -28,6 +28,15 @@
     1. DeFiLlama HTML scraping (`/unlocks/{protocol}`)
     2. Static JSON fallback ([lib/data/tokenUnlocks.json](cci:7://file:///c:/Users/PC15/Desktop/Projelerim/futures_tracker_v0.3/lib/data/tokenUnlocks.json:0:0-0:0))
     3. "N/A" for unmapped coins (no fake data generation)
+
+- **Klines Proxy Architecture**:
+  - Direct browser calls to Binance Klines API are FORBIDDEN.
+  - MUST use `/api/binance/klines?symbol={SYMBOL}&interval={INTERVAL}&limit={LIMIT}`.
+  - **Supported Intervals**: `1m, 3m, 5m, 15m, 30m, 1h, 2h, 4h, 6h, 8h, 12h, 1d, 3d, 1w, 1M`
+  - **Response**: `CandleData[]` (time as Unix seconds, OHLC values)
+  - **Cache**: No cache (`revalidate: 0`) - Fresh data priority.
+  - **Max Limit**: 1500 candles per request.
+
 
 ## 2. Visual Language
 - **Theme**: Dark Mode ONLY. No light mode support.
@@ -119,6 +128,7 @@ type MetricType =
   | 'globalLongShort' 
   | 'takerBuySell'
   | 'basis'
+  | 'fundingRate'           // <-- YENİ EKLENEN
   // Spot/Margin Metrics
   | '24hrLargeInflow'
   | 'marginDebtGrowth'
@@ -176,6 +186,30 @@ interface MarginLongShortData {
   longShortRatio: string;
   longPosition: string;
   shortPosition: string;
+
+// OHLC Candlestick Data (Klines API Response)
+interface CandleData {
+  time: string | number;  // Unix timestamp (seconds) or YYYY-MM-DD
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+}
+
+// Taker Buy/Sell Volume Ratio
+interface TakerBuySellData {
+  buySellRatio: string;
+  buyVol: string;
+  sellVol: string;
+  timestamp: number;
+}
+
+// Funding Rate Data (Perpetual Futures)
+interface FundingRateData {
+  symbol: string;
+  fundingRate: string;   // e.g., "0.0001" (0.01%)
+  fundingTime: number;   // Unix timestamp (ms) of next funding
+}
 }
 
 ```
@@ -209,3 +243,57 @@ interface MarginLongShortData {
 - **UI Components**:
   - **Command Deck**: A collapsible sidebar on the left.
   - **Interaction**: Adding a coin adds it to the store AND highlights the corresponding orb in WebGL.
+
+
+## 6. API Export Protocol (Nebula Data Bridge v1.0)
+> **Status**: Active since v1.3.0
+> **Purpose**: Enable external applications (e.g., Backtest & Anomaly Detection Engine) to consume market data from Liquidity Nebula.
+
+### Base URL
+| Environment | URL |
+|-------------|-----|
+| **Development** | `http://localhost:3000` |
+| **Production** | `https://[DEPLOYMENT_DOMAIN]` |
+
+### Exported Endpoints
+
+| Endpoint | Parameters | Response | Cache |
+|----------|------------|----------|-------|
+| `GET /api/binance/metrics` | `symbol`, `metric`, `period`, `marketType`, `limit` | `MetricDataPoint[]` | 60s |
+| `GET /api/token/metadata` | `symbol` | [TokenMetadata](cci:2://file:///c:/Users/PC15/Desktop/Projelerim/futures_tracker_v0.3/lib/types.ts:33:0-42:1) | 60s |
+| `GET /api/binance/klines` | `symbol`, `interval`, `limit` | `CandleData[]` | 0s |
+
+### Consumption Patterns
+
+**Server-Side:**
+```typescript
+const res = await fetch('http://localhost:3000/api/binance/metrics?symbol=BTCUSDT&metric=openInterest&period=1h');
+const data = await res.json();
+```
+
+**Client-Side (SWR):**
+```typescript
+import useSWR from 'swr';
+const { data, error } = useSWR<OpenInterestData[]>(
+  '/api/binance/metrics?symbol=BTCUSDT&metric=openInterest',
+  fetcher
+);
+```
+
+### Integration Rules
+1. All consuming applications MUST import types from `lib/types.ts`.
+2. All endpoints use Next.js Edge Runtime for low-latency responses.
+3. Error format: `{ error: string }` with HTTP 400 or 500.
+
+### Type Reference
+Canonical source: `lib/types.ts`
+```
+├── CandleData
+├── TickerData
+├── TokenMetadata, TokenUnlock, UnlockAllocation
+├── MetricType, MarketType
+├── OpenInterestData, LongShortRatioData, TakerBuySellData
+├── FundingRateData, MoneyFlowData, MarginDebtData
+├── IsoMarginBorrowData, MarginLongShortData
+└── UnifiedMarketData
+```
