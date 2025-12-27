@@ -82,6 +82,10 @@ const transformData = (data: any[], metric: MetricType): { time: Time; value: nu
                 case 'platformConcentration':
                     value = parseFloat(item.longShortRatio || item.value || item.ratio || '0');
                     break;
+                case 'fundingRate':
+                    // Funding rate comes as decimal (e.g., 0.0001 = 0.01%)
+                    value = parseFloat(item.fundingRate || '0') * 100; // Convert to percentage
+                    break;
                 default:
                     value = parseFloat(item.value) || 0;
             }
@@ -283,6 +287,7 @@ export function MetricChart({
         globalLongShort: 'Global Long/Short',
         takerBuySell: 'Taker Buy/Sell',
         basis: 'Basis',
+        fundingRate: 'Funding Rate',
         // Spot/Margin Metrics
         '24hrLargeInflow': '24h Large Inflow',
         marginDebtGrowth: 'Margin Debt Growth',

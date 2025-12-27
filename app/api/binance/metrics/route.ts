@@ -13,6 +13,7 @@ const FUTURES_ENDPOINTS: Record<string, string> = {
     topLongShortPositions: 'https://fapi.binance.com/futures/data/topLongShortPositionRatio',
     globalLongShort: 'https://fapi.binance.com/futures/data/globalLongShortAccountRatio',
     takerBuySell: 'https://fapi.binance.com/futures/data/takerlongshortRatio',
+    fundingRate: 'https://fapi.binance.com/fapi/v1/fundingRate',
 };
 
 // Spot Endpoints (api.binance.com)
@@ -139,6 +140,9 @@ export async function GET(request: NextRequest) {
         } else if (endpoint.includes('/api/v3/klines')) {
             // Klines endpoint
             binanceUrl = `${endpoint}?symbol=${symbol}&interval=${period}&limit=${limit}`;
+        } else if (endpoint.includes('/fapi/v1/fundingRate')) {
+            // Funding Rate endpoint - uses symbol + limit only (no period)
+            binanceUrl = `${endpoint}?symbol=${symbol}&limit=${limit}`;
         } else {
             // Futures-style endpoint
             binanceUrl = `${endpoint}?symbol=${symbol}&period=${period}&limit=${limit}`;

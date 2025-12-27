@@ -86,6 +86,7 @@ export type MetricType =
   | 'globalLongShort'
   | 'takerBuySell'
   | 'basis'
+  | 'fundingRate'
   // Spot/Margin Metrics
   | '24hrLargeInflow'
   | 'marginDebtGrowth'
@@ -119,6 +120,13 @@ export interface TakerBuySellData {
   buyVol: string;
   sellVol: string;
   timestamp: number;
+}
+
+// Funding Rate Data (Perpetual Futures)
+export interface FundingRateData {
+  symbol: string;
+  fundingRate: string;   // e.g., "0.0001" (0.01%)
+  fundingTime: number;   // Unix timestamp (ms) of next funding
 }
 
 // --- SPOT/MARGIN METRICS TYPES ---
@@ -161,7 +169,33 @@ export type MetricDataPoint =
   | OpenInterestData
   | LongShortRatioData
   | TakerBuySellData
+  | FundingRateData
   | MoneyFlowData
   | MarginDebtData
   | IsoMarginBorrowData
   | MarginLongShortData;
+
+// --- UNIFIED MARKET DATA (AI FUSION) ---
+
+// Unified market data structure for AI manipulation detection
+// This is the "Fusion" payload returned by the AI analysis API
+export interface UnifiedMarketData {
+  timestamp: number;
+  price: {
+    spot: number;
+    futures: number;
+  };
+  volume: {
+    spot: number;
+    futures: number;
+  };
+  metrics: {
+    openInterest: number;
+    fundingRate: number;    // Decimal (e.g., 0.0001 = 0.01%)
+    longShortRatio: number; // Ratio (e.g., 1.5 = 60% long / 40% short)
+  };
+  signals: {
+    spread: number;         // (futures - spot) / spot * 100
+    divergence: number;     // Calculated correlation divergence score
+  };
+}
